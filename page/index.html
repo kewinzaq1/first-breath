@@ -1,0 +1,674 @@
+<title>First Breath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Karla:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground: #0C0A08;
+    --ground-deep: #070605;
+    --surface: #161210;
+    --ink: #EDE4D7;
+    --muted: #93867A;
+    --faint: #4A423A;
+    --ember: #D9954A;
+    --ember-dim: #8A5F30;
+    --data: #6E9BD1;
+    --data-dim: #3D5573;
+    --display: "Fraunces", Georgia, "Times New Roman", serif;
+    --body: "Karla", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 300;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--ember-dim); color: var(--ink); }
+
+  .scene {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 1.5rem;
+    position: relative;
+  }
+
+  .measure { max-width: 34rem; width: 100%; }
+
+  .center { text-align: center; }
+
+  h1, h2, .display {
+    font-family: var(--display);
+    font-weight: 300;
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .eyebrow.data-voice { color: var(--data); }
+
+  /* ---- scroll reveal ---- */
+  .rv {
+    opacity: 0;
+    transform: translateY(1.75rem);
+    transition: opacity 1.1s cubic-bezier(.22,.6,.24,1), transform 1.1s cubic-bezier(.22,.6,.24,1);
+  }
+  .rv.on { opacity: 1; transform: none; }
+  .rv.d1 { transition-delay: .15s; }
+  .rv.d2 { transition-delay: .3s; }
+  .rv.d3 { transition-delay: .45s; }
+  .rv.d4 { transition-delay: .6s; }
+
+  /* ================= SCENE 1 · HERO ================= */
+  .hero { background: var(--ground); }
+
+  .orb {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 42% 38%, #F0B269 0%, var(--ember) 34%, #6B4318 78%, transparent 100%);
+    filter: blur(1px);
+    box-shadow: 0 0 90px 18px rgba(217,149,74,0.18);
+    animation: idlebreath 9s ease-in-out infinite;
+  }
+
+  @keyframes idlebreath {
+    0%, 100% { transform: scale(1); opacity: .85; }
+    45% { transform: scale(1.12); opacity: 1; }
+  }
+
+  .hero h1 {
+    font-size: clamp(3.2rem, 9vw, 5.6rem);
+    letter-spacing: 0.01em;
+    margin-top: 3rem;
+    line-height: 1.05;
+  }
+
+  .hero .sub {
+    margin-top: 1.4rem;
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 26rem;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.2rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--faint);
+    animation: hint 3.4s ease-in-out infinite;
+  }
+  @keyframes hint {
+    0%, 100% { transform: translateY(0); opacity: .55; }
+    50% { transform: translateY(7px); opacity: 1; }
+  }
+
+  /* ================= SCENE 2 · NOISE ================= */
+  .noise { background: var(--ground); overflow: hidden; min-height: 130vh; }
+
+  .noise-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .chip {
+    position: absolute;
+    font-family: var(--body);
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid #241E19;
+    padding: 0.45rem 0.95rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  .noise.on .chip { opacity: .8; }
+  .chip.loud { color: var(--ink); border-color: #35291D; }
+
+  @keyframes drift {
+    from { transform: translate(0, 0) rotate(var(--rot, 0deg)); }
+    to   { transform: translate(var(--dx, 12px), var(--dy, -16px)) rotate(var(--rot2, 1.5deg)); }
+  }
+
+  .noise-copy {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(12,10,8,0.92) 30%, rgba(12,10,8,0.55) 70%, transparent 100%);
+    padding: 4rem 2rem;
+  }
+
+  .noise-copy h2 { font-size: clamp(1.9rem, 4.5vw, 2.9rem); line-height: 1.25; }
+  .noise-copy p { margin-top: 1.3rem; color: var(--muted); }
+
+  /* ================= SCENE 3 · ALONE ================= */
+  .alone {
+    background: var(--ground-deep);
+    min-height: 115vh;
+  }
+  .alone .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--muted);
+    margin: 0 auto 4.5rem;
+    box-shadow: 0 0 24px 4px rgba(147,134,122,0.35);
+  }
+  .alone h2 {
+    font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+    line-height: 1.3;
+  }
+  .alone .quiet { color: var(--muted); margin-top: 1.6rem; }
+
+  /* ================= SCENE 4 · INSTINCT ================= */
+  .instinct { background: linear-gradient(var(--ground-deep), var(--ground) 30%); }
+
+  .ring {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ember);
+    box-shadow: 0 0 60px 4px rgba(217,149,74,0.12), inset 0 0 34px rgba(217,149,74,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    color: var(--ember);
+    margin-bottom: 3.4rem;
+  }
+
+  .instinct h2 { font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.25; }
+  .instinct .steps {
+    margin-top: 1.6rem;
+    font-family: var(--display);
+    font-size: clamp(1.25rem, 2.6vw, 1.55rem);
+    color: var(--ember);
+    font-style: italic;
+  }
+  .instinct .doubt {
+    margin-top: 4.5rem;
+    color: var(--muted);
+    border-top: 1px solid #241E19;
+    padding-top: 2.2rem;
+    font-size: 1.05rem;
+  }
+
+  /* ================= SCENE 5 · ASK ================= */
+  .ask { background: var(--ground); min-height: 120vh; }
+
+  .ask h2 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.25; }
+  .ask .lede { color: var(--muted); margin-top: 1.3rem; }
+
+  .threads {
+    margin-top: 4rem;
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    max-width: 40rem;
+  }
+
+  .source {
+    background: var(--surface);
+    border: 1px solid #1E2732;
+    border-left: 2px solid var(--data);
+    padding: 1.3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .source .api {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--data);
+  }
+  .source .what { font-size: 1.02rem; color: var(--ink); font-weight: 400; }
+  .source .from { font-size: 0.85rem; color: var(--muted); font-family: var(--mono); }
+
+  /* ================= SCENE 6 · REVEAL ================= */
+  .reveal { background: var(--ground-deep); min-height: 160vh; justify-content: flex-start; padding-top: 22vh; }
+
+  .reveal .measure { max-width: 38rem; }
+  .reveal h2 { font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.3; text-align: center; }
+
+  .quotes { margin-top: 5rem; display: flex; flex-direction: column; gap: 2.8rem; }
+
+  .q {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(1.2rem, 2.8vw, 1.5rem);
+    line-height: 1.5;
+    color: var(--data);
+    text-align: center;
+    text-wrap: balance;
+  }
+  .q .src {
+    display: block;
+    margin-top: 0.7rem;
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--data-dim);
+  }
+
+  .clusters {
+    margin-top: 6rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 620px) { .clusters { grid-template-columns: 1fr; } }
+
+  .cluster {
+    background: var(--surface);
+    border: 1px solid #2A2116;
+    padding: 1.6rem 1.4rem;
+    text-align: center;
+  }
+  .cluster .n {
+    font-family: var(--mono);
+    font-size: 1.9rem;
+    font-weight: 500;
+    color: var(--ember);
+    font-variant-numeric: tabular-nums;
+  }
+  .cluster .label {
+    margin-top: 0.5rem;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  .cluster .of {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .reveal .verdict {
+    margin-top: 5rem;
+    text-align: center;
+    font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+    font-family: var(--display);
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .reveal .verdict em { color: var(--ember); font-style: italic; }
+
+  /* ================= SCENE 7 · THE WAY ================= */
+  .way { background: var(--ground); }
+  .way h2 {
+    font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+    line-height: 1.25;
+  }
+  .way p { margin-top: 1.6rem; color: var(--muted); max-width: 30rem; margin-left: auto; margin-right: auto; }
+  .way .keeps {
+    margin-top: 3.2rem;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.35rem;
+    color: var(--ember);
+  }
+
+  /* ================= SCENE 8 · BREATHE ================= */
+  .breathe {
+    background: radial-gradient(ellipse at 50% 42%, #14100C 0%, var(--ground-deep) 68%);
+    min-height: 110vh;
+  }
+
+  .breath-orb {
+    width: 170px; height: 170px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 42% 38%, #F0B269 0%, var(--ember) 36%, #5C3A15 80%, transparent 100%);
+    box-shadow: 0 0 110px 26px rgba(217,149,74,0.16);
+    transform: scale(0.72);
+    transition: transform 4s cubic-bezier(.4,0,.4,1);
+    margin-bottom: 3.2rem;
+  }
+  .breath-orb.in  { transform: scale(1.16); transition-duration: 4s; }
+  .breath-orb.out { transform: scale(0.72); transition-duration: 6s; }
+
+  .breath-word {
+    font-family: var(--display);
+    font-size: clamp(1.6rem, 4vw, 2.3rem);
+    min-height: 3rem;
+    color: var(--ink);
+    transition: opacity .9s ease;
+  }
+  .breath-count {
+    margin-top: 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    min-height: 1.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .begin {
+    margin-top: 2.6rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ember);
+    background: transparent;
+    border: 1px solid var(--ember-dim);
+    border-radius: 999px;
+    padding: 1rem 2.4rem;
+    cursor: pointer;
+    transition: background .4s ease, color .4s ease, box-shadow .4s ease;
+  }
+  .begin:hover, .begin:focus-visible {
+    background: var(--ember);
+    color: var(--ground-deep);
+    box-shadow: 0 0 50px rgba(217,149,74,0.35);
+    outline: none;
+  }
+  .begin:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .begin[disabled] { opacity: 0; pointer-events: none; }
+
+  .after-breath {
+    margin-top: 3.4rem;
+    opacity: 0;
+    transition: opacity 2s ease 0.5s;
+    text-align: center;
+  }
+  .after-breath.on { opacity: 1; }
+  .after-breath .thats {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.3rem;
+    color: var(--ember);
+  }
+
+  /* ================= FOOTER ================= */
+  .coda {
+    background: var(--ground-deep);
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+  }
+  .coda .gtm {
+    font-family: var(--display);
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    line-height: 1.5;
+    max-width: 34rem;
+    margin: 0 auto;
+    color: var(--ink);
+  }
+  .coda .gtm em { color: var(--data); font-style: italic; }
+  .coda .built {
+    margin-top: 2.4rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .coda .note {
+    margin-top: 2.8rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--faint);
+    letter-spacing: 0.05em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb, .chip, .scroll-hint { animation: none; }
+    .rv { transition: opacity .6s ease; transform: none; }
+    .breath-orb { transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+
+<main>
+
+  <!-- 1 · HERO -->
+  <section class="scene hero center">
+    <div class="orb" aria-hidden="true"></div>
+    <h1 class="rv">First Breath</h1>
+    <p class="sub rv d2">A pragmatic way into meditation — and the story of how the web itself pointed the way.</p>
+    <div class="scroll-hint" aria-hidden="true">scroll</div>
+  </section>
+
+  <!-- 2 · NOISE -->
+  <section class="scene noise" id="noise">
+    <div class="noise-field" id="noiseField" aria-hidden="true"></div>
+    <div class="noise-copy measure">
+      <p class="eyebrow rv">the problem</p>
+      <h2 class="rv d1">You decided to start meditating.<br>Then you opened the app&nbsp;store.</h2>
+      <p class="rv d2">Five hundred guided journeys. Seven-day challenges. Sleep stories, soundscapes, subscriptions. A thousand doors, and every one of them says <em>begin here</em>.</p>
+    </div>
+  </section>
+
+  <!-- 3 · ALONE -->
+  <section class="scene alone center">
+    <div class="measure">
+      <div class="dot rv" aria-hidden="true"></div>
+      <h2 class="rv d1">We have never had more tools for&nbsp;calm.</h2>
+      <p class="quiet rv d2">And we have never felt more disconnected. Most people don't fail at meditation. They fail at choosing how to start.</p>
+    </div>
+  </section>
+
+  <!-- 4 · INSTINCT -->
+  <section class="scene instinct center">
+    <div class="measure">
+      <div class="ring rv" style="margin-left:auto;margin-right:auto;">10:00</div>
+      <p class="eyebrow rv d1">my instinct</p>
+      <h2 class="rv d2">I teach meditation the pragmatic way.</h2>
+      <p class="steps rv d3">Start a timer. Count your breaths. That's&nbsp;it.</p>
+      <p class="doubt rv d4">No incense, no astral planes, no library of five hundred sessions. It works for the people I sit with. But is that what the world wants — or just what I&nbsp;believe?</p>
+    </div>
+  </section>
+
+  <!-- 5 · ASK -->
+  <section class="scene ask center">
+    <div class="measure" style="max-width:40rem;">
+      <p class="eyebrow data-voice rv">the research</p>
+      <h2 class="rv d1">So instead of guessing,<br>I asked the web what it really&nbsp;thinks.</h2>
+      <p class="lede rv d2">One agent, wired to Bright Data, fanned out across the places where people tell the truth about meditation apps.</p>
+    </div>
+    <div class="threads" id="threads"></div>
+  </section>
+
+  <!-- 6 · REVEAL -->
+  <section class="scene reveal">
+    <div class="measure">
+      <p class="eyebrow data-voice rv center" style="text-align:center;">what came back</p>
+      <h2 class="rv d1">Thousands of strangers.<br>One message.</h2>
+
+      <div class="quotes" id="quotes"></div>
+
+      <div class="clusters" id="clusters"></div>
+
+      <p class="verdict rv">The market wasn't asking for another library of calm.<br>It was asking for <em>permission to keep it simple.</em></p>
+    </div>
+  </section>
+
+  <!-- 7 · THE WAY -->
+  <section class="scene way center">
+    <div class="measure">
+      <p class="eyebrow rv">the way</p>
+      <h2 class="rv d1">The data didn't give me a product.<br>It gave me permission.</h2>
+      <p class="rv d2">First Breath is meditation with everything removed except the part that works. No accounts of enlightenment. No five-hundred-session library. No guru.</p>
+      <p class="keeps rv d3">One timer. Counted breaths. Nothing else.</p>
+    </div>
+  </section>
+
+  <!-- 8 · BREATHE -->
+  <section class="scene breathe center">
+    <div class="breath-orb" id="breathOrb" aria-hidden="true"></div>
+    <div class="breath-word" id="breathWord" aria-live="polite">Try it now.</div>
+    <div class="breath-count" id="breathCount"></div>
+    <button class="begin" id="beginBtn">Begin · ten breaths</button>
+    <div class="after-breath" id="afterBreath">
+      <p class="thats">That's the whole product.</p>
+    </div>
+  </section>
+
+  <!-- CODA -->
+  <footer class="coda">
+    <p class="gtm">This is what go-to-market looks like when you stop guessing —<br>and let <em>the web itself</em> show you the way.</p>
+    <p class="built">Built with Bright Data · Web Scraper API · Crawl API · SERP API</p>
+    <p class="note">demo build — research figures shown are illustrative placeholders, wired for live Bright Data output</p>
+  </footer>
+
+</main>
+
+<!-- Research data. The engine (first-breath-engine → node src/run.js) replaces this
+     blob with real Bright Data output; these values are illustrative placeholders. -->
+<script id="research-data" type="application/json">
+{
+  "sources": [
+    { "api": "Web Scraper API", "what": "12,438 app-store reviews, structured", "from": "calm · headspace · waking up" },
+    { "api": "Crawl API", "what": "3,120 forum threads on starting — and quitting", "from": "r/meditation · r/getdisciplined" },
+    { "api": "SERP API", "what": "4,800 search results for how beginners actually ask", "from": "\"how to start meditating without an app\"" }
+  ],
+  "quotes": [
+    { "text": "I just wanted to breathe for a minute, not pick from 40 categories.", "src": "app-store review · via web scraper api" },
+    { "text": "Too woo-woo for me. I gave up in week one.", "src": "app-store review · via web scraper api" },
+    { "text": "Ten minutes felt like an hour. Why is there no short option that isn't locked?", "src": "r/meditation · via crawl api" },
+    { "text": "Honestly I just set a timer and count my breaths now. Only thing that stuck.", "src": "r/getdisciplined · via crawl api" }
+  ],
+  "clusters": [
+    { "pct": "31%", "label": "Too much woo", "of": "of negative reviews" },
+    { "pct": "27%", "label": "Too long to start", "of": "of negative reviews" },
+    { "pct": "22%", "label": "Choice overload", "of": "of negative reviews" }
+  ]
+}
+</script>
+
+<script>
+  // ---------- render research data (must run before reveal observers) ----------
+  try {
+    const R = JSON.parse(document.getElementById('research-data').textContent);
+    const el = (tag, cls, text) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    };
+    const threads = document.getElementById('threads');
+    (R.sources || []).forEach((s, i) => {
+      const d = el('div', 'source rv d' + Math.min(i + 1, 4));
+      d.append(el('span', 'api', s.api), el('span', 'what', s.what), el('span', 'from', s.from));
+      threads.append(d);
+    });
+    const quotes = document.getElementById('quotes');
+    (R.quotes || []).forEach((q) => {
+      const b = el('blockquote', 'q rv', '“' + q.text + '”');
+      b.append(el('span', 'src', q.src));
+      quotes.append(b);
+    });
+    const clusters = document.getElementById('clusters');
+    (R.clusters || []).forEach((c, i) => {
+      const d = el('div', 'cluster rv' + (i ? ' d' + Math.min(i, 4) : ''));
+      d.append(el('div', 'n', c.pct), el('div', 'label', c.label), el('div', 'of', c.of));
+      clusters.append(d);
+    });
+  } catch (e) { console.error('research-data render failed', e); }
+
+  // ---------- scroll reveals ----------
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+    }
+  }, { threshold: 0.25 });
+  document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+  // noise scene chip fade-in trigger
+  const noiseScene = document.getElementById('noise');
+  const noiseIO = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { noiseScene.classList.add('on'); noiseIO.disconnect(); }
+  }, { threshold: 0.2 });
+  noiseIO.observe(noiseScene);
+
+  // ---------- the noise field ----------
+  const CHIPS = [
+    '7-Day Beginner Challenge', 'Premium · $69.99/yr', 'Sleep Story #412', '528Hz Healing Frequencies',
+    'Unlock Your Chakras', 'Masterclass with a Monk', 'Anxiety Pack · 32 sessions', 'Rain on a Tin Roof (10h)',
+    'Streak lost 😔', 'Manifest Abundance', 'Body Scan · Advanced', 'Just 5 minutes a day!*',
+    'Breathwork Bootcamp', 'Limited offer — 40% off', 'Guided Journey, Part 14 of 60', 'Choose your narrator',
+    'New! AI Meditation Coach', 'Rate us 5 stars ⭐', 'Vibrational Alignment', 'Complete the intro course to unlock'
+  ];
+  const field = document.getElementById('noiseField');
+  CHIPS.forEach((text, i) => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (i % 4 === 0 ? ' loud' : '');
+    c.textContent = text;
+    const col = i % 2 === 0 ? Math.random() * 38 : 58 + Math.random() * 32; // keep a corridor clear for copy
+    c.style.left = col + '%';
+    c.style.top = (4 + Math.random() * 88) + '%';
+    c.style.setProperty('--rot', (Math.random() * 8 - 4).toFixed(1) + 'deg');
+    c.style.setProperty('--rot2', (Math.random() * 8 - 4).toFixed(1) + 'deg');
+    c.style.setProperty('--dx', (Math.random() * 30 - 15).toFixed(0) + 'px');
+    c.style.setProperty('--dy', (Math.random() * 30 - 15).toFixed(0) + 'px');
+    c.style.animationDelay = (-Math.random() * 14).toFixed(1) + 's';
+    c.style.transitionDelay = (Math.random() * 1.8).toFixed(2) + 's';
+    field.appendChild(c);
+  });
+
+  // ---------- breath timer ----------
+  const orb = document.getElementById('breathOrb');
+  const word = document.getElementById('breathWord');
+  const count = document.getElementById('breathCount');
+  const btn = document.getElementById('beginBtn');
+  const after = document.getElementById('afterBreath');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const IN_MS = 4000, OUT_MS = 6000, TOTAL = 10;
+  let running = false;
+
+  function breathe(n) {
+    if (n > TOTAL) {
+      word.textContent = 'Welcome back.';
+      count.textContent = '';
+      orb.classList.remove('in', 'out');
+      after.classList.add('on');
+      running = false;
+      return;
+    }
+    word.textContent = 'Breathe in';
+    count.textContent = n + ' / ' + TOTAL;
+    if (!reduced) { orb.classList.remove('out'); orb.classList.add('in'); }
+    setTimeout(() => {
+      if (!running) return;
+      word.textContent = 'Breathe out';
+      if (!reduced) { orb.classList.remove('in'); orb.classList.add('out'); }
+      setTimeout(() => { if (running) breathe(n + 1); }, OUT_MS);
+    }, IN_MS);
+  }
+
+  btn.addEventListener('click', () => {
+    running = true;
+    btn.setAttribute('disabled', '');
+    breathe(1);
+  });
+</script>

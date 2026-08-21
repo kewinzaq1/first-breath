@@ -1,0 +1,14 @@
+{
+  "name": "first-breath-engine",
+  "version": "0.1.0",
+  "description": "GTM research engine for First Breath — collects real market signal via Bright Data, distills it with Claude, and feeds the scrollytelling landing page.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "collect": "node src/run.js --collect-only",
+    "start": "node src/run.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.60.0"
+  }
+}
