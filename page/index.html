@@ -311,6 +311,17 @@
     color: var(--muted);
   }
 
+  .gap {
+    margin-top: 3.2rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--data-dim);
+    letter-spacing: 0.02em;
+  }
+  .gap b { font-weight: 500; color: var(--data); }
+
   .reveal .verdict {
     margin-top: 5rem;
     text-align: center;
@@ -440,6 +451,16 @@
     letter-spacing: 0.05em;
   }
 
+  /* projector / large displays: scale the whole system up */
+  @media (min-width: 1500px) {
+    html { font-size: 21px; }
+    .orb { width: 160px; height: 160px; }
+    .ring { width: 180px; height: 180px; font-size: 0.9rem; }
+    .breath-orb { width: 230px; height: 230px; }
+    .cluster .n { font-size: 2.6rem; }
+    .breath-count { font-size: 1rem; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .orb, .chip, .scroll-hint { animation: none; }
     .rv { transition: opacity .6s ease; transform: none; }
@@ -508,6 +529,8 @@
 
       <div class="clusters" id="clusters"></div>
 
+      <p class="gap rv">serp · <b>"how to start meditating without an app"</b> · 9 results<br>reddit, blogs, a facebook group, quora. not one of them is a timer.</p>
+
       <p class="verdict rv">The market wasn't asking for another library of calm.<br>It was asking for <em>permission to keep it simple.</em></p>
     </div>
   </section>
@@ -536,19 +559,19 @@
   <!-- CODA -->
   <footer class="coda">
     <p class="gtm">This is what go-to-market looks like when you stop guessing —<br>and let <em>the web itself</em> show you the way.</p>
-    <p class="built">Built with Bright Data · Web Unlocker API · SERP API</p>
-    <p class="note">450 reviews · 30 threads · 42 search results collected via Bright Data on aug 21, 2026 — all quotes verbatim</p>
+    <p class="built">Built with Bright Data SERP API · Apple's public review feed · Claude</p>
+    <p class="note">450 reviews · 30 threads · 42 search results collected on aug 21, 2026 — every quote verbatim, every number computed from the corpus</p>
   </footer>
 
 </main>
 
-<!-- Research data. The engine (first-breath-engine → node src/run.js) replaces this
-     blob with real Bright Data output; these values are illustrative placeholders. -->
+<!-- Research data. Injected by engine/src/run.js from engine/out/research.json —
+     real output of the 2026-08-21 collection run. Quotes are verbatim from the corpus. -->
 <script id="research-data" type="application/json">
 {
   "sources": [
     {
-      "api": "Web Unlocker API",
+      "api": "App Store review feed · public API",
       "what": "450 app-store reviews — 210 of them negative",
       "from": "calm · headspace · waking up"
     },
@@ -566,15 +589,15 @@
   "quotes": [
     {
       "text": "Congrats instead of lowering my heart rate I have increased my rage.",
-      "src": "headspace app-store review · via bright data"
+      "src": "headspace app-store review · apple public feed"
     },
     {
       "text": "Now I just feel overwhelmed with the amount of content. A feature that randomly selects a session would reduce decision fatigue.",
-      "src": "headspace app-store review · via bright data"
+      "src": "headspace app-store review · apple public feed"
     },
     {
       "text": "It was and should be a simple app following the idea itself.",
-      "src": "headspace app-store review · via bright data"
+      "src": "headspace app-store review · apple public feed"
     },
     {
       "text": "The idea that we now need to pay a $70 yearly subscription for a timer is embarrassingly greedy.",
@@ -663,9 +686,20 @@
     const c = document.createElement('span');
     c.className = 'chip' + (i % 4 === 0 ? ' loud' : '');
     c.textContent = text;
-    const col = i % 2 === 0 ? Math.random() * 38 : 58 + Math.random() * 32; // keep a corridor clear for copy
-    c.style.left = col + '%';
-    c.style.top = (4 + Math.random() * 88) + '%';
+    if (window.innerWidth < 760) {
+      // phones: copy owns the middle band; chips sit in staggered rows above and below it
+      if (i % 3 === 2) return; // fewer chips — less pile-up on a narrow screen
+      const k = Math.floor(i / 3) * 2 + (i % 3); // 0..13
+      const row = Math.floor(k / 2), band = k % 2 === 0;
+      c.style.left = (row % 2 ? 30 : 4) + Math.random() * 24 + '%';
+      c.style.top = ((band ? 2 : 74) + row * 3.3 + Math.random() * 1.2) + '%';
+    } else {
+      // wide: keep a clear corridor for the copy — left chips are right-anchored so
+      // their far edge never crosses into it
+      if (i % 2 === 0) c.style.right = (63 + Math.random() * 30) + '%';
+      else c.style.left = (63 + Math.random() * 30) + '%';
+      c.style.top = (4 + Math.random() * 88) + '%';
+    }
     c.style.setProperty('--rot', (Math.random() * 8 - 4).toFixed(1) + 'deg');
     c.style.setProperty('--rot2', (Math.random() * 8 - 4).toFixed(1) + 'deg');
     c.style.setProperty('--dx', (Math.random() * 30 - 15).toFixed(0) + 'px');
@@ -693,6 +727,8 @@
       orb.classList.remove('in', 'out');
       after.classList.add('on');
       running = false;
+      btn.textContent = 'Again · ten breaths';
+      btn.removeAttribute('disabled');
       return;
     }
     word.textContent = 'Breathe in';
@@ -707,8 +743,20 @@
   }
 
   btn.addEventListener('click', () => {
+    if (running) return;
     running = true;
     btn.setAttribute('disabled', '');
+    after.classList.remove('on');
     breathe(1);
+  });
+
+  // stage safety: Escape stops a running session and resets the scene
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !running) return;
+    running = false;
+    orb.classList.remove('in', 'out');
+    word.textContent = 'Try it now.';
+    count.textContent = '';
+    btn.removeAttribute('disabled');
   });
 </script>

@@ -11,7 +11,7 @@ First Breath is a pragmatic meditation product idea (start a timer, count your b
 │                                                                     │
 │   Bright Data ──▶  engine/collect.js  ──▶  corpus.json              │
 │    │                                                                │
-│    ├─ Web Unlocker → app-store reviews (Calm, Headspace, Waking Up) │
+│    ├─ Apple review feed (public API; Unlocker is KYC-gated there)  │
 │    ├─ Web Unlocker → reddit threads (r/Meditation, r/getdisciplined)│
 │    └─ SERP API     → google results for beginner queries            │
 │                                                                     │
@@ -69,7 +69,7 @@ Nothing in the pipeline is meditation-specific. Swap the app IDs, subreddits, an
 ## Notes & compliance
 
 - All web access flows through Bright Data's `/request` endpoint — two zones, one token, zero scraping infrastructure of your own.
-- A default run is ~15 Web Unlocker fetches + 5 SERP queries — well inside a trial account.
+- A default run is ~9 Apple-feed fetches (Unlocker attempted first) + ~8 SERP queries — well inside a trial account.
 - Quotes are used verbatim for research/demo purposes; respect target-site ToS beyond the demo. Bright Data's compliance layer is part of the story.
 
-MIT licensed. Built with Bright Data · Web Unlocker · SERP API · Web Scraper API (optional path) · Claude.
+MIT licensed. Built with Bright Data SERP API · Apple's public review feed · Claude. (Web Unlocker and Web Scraper API paths are wired and ready once the account has KYC.)

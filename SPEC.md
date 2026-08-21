@@ -61,7 +61,7 @@ All collection goes through Bright Data (`POST https://api.brightdata.com/reques
 
 | Fan-out | Zone | Targets | Yield |
 |---|---|---|---|
-| App-store reviews | Web Unlocker | Apple customer-review feeds: Calm `571800810`, Headspace `493145008`, Waking Up `1307736395` (3 pages each) | rating, title, text per review |
+| App-store reviews | Web Unlocker → **direct fetch** (Apple hosts are KYC-gated on the Unlocker; every verified run served 0 pages via unlocker, 9 via direct — credited on the page as "App Store review feed · public API") | Apple customer-review feeds: Calm `571800810`, Headspace `493145008`, Waking Up `1307736395` (3 pages each) | rating, title, text per review |
 | Community threads | Web Unlocker | `reddit.com/r/{Meditation,getdisciplined}/search.json`, 3 curated queries about starting/quitting/frustration | title, selftext, score, permalink |
 | Search landscape | SERP API (`brd_json=1`) | 5 beginner queries ("how to start meditating", "…without an app", …) | top-8 organic per query + related searches |
 
