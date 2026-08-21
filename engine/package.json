@@ -8,6 +8,7 @@
     "collect": "node src/run.js --collect-only",
     "start": "node src/run.js"
   },
+  "comment": ".env is auto-loaded by src/loadenv.js — no --env-file flag needed",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.60.0"
   }

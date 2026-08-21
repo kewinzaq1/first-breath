@@ -45,10 +45,10 @@ npm install
 cp .env.example .env      # fill in: BRIGHTDATA_API_TOKEN, zone names, ANTHROPIC_API_KEY
 
 # Full pipeline — collect, analyze, inject into ../page/index.html:
-node --env-file=.env src/run.js
+node src/run.js          # .env is auto-loaded (src/loadenv.js) — no flag needed
 
 # Or test the Bright Data side alone (no Anthropic key needed):
-node --env-file=.env src/run.js --collect-only
+node src/run.js --collect-only
 ```
 
 Outputs land in `engine/out/`: `corpus.json` (raw collected signal) and `research.json` (the distilled result). The final step rewrites the `research-data` blob inside `page/index.html` in place. Open the page or republish it — the story now runs on real data. Once it does, delete the "illustrative placeholders" note in the page footer.

@@ -1,14 +1,52 @@
 // The three research fan-outs from the landing page's "asking the web" scene.
 // Each returns plain JS objects ready for the analysis step.
+//
+// Resilience model: Bright Data zones are the primary path; every collector has
+// a fallback so a zone restriction never zeroes out a source.
+//   reviews : Web Unlocker → direct fetch (Apple's feed is a public API)
+//   reddit  : Web Unlocker → SERP site:reddit.com search (needs only the SERP zone)
+//   serp    : SERP zone (no fallback needed — it's the base capability)
 
 import { unlock, unlockJson, serp } from './brightdata.js';
 
+const UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+
+/** Try Web Unlocker first; fall back to a direct fetch for public endpoints.
+    Tracks which path served, so the demo can attribute sources honestly. */
+export const pathStats = { unlocker: 0, direct: 0 };
+
+async function jsonViaUnlockerOrDirect(url) {
+  let unlockerErr;
+  try {
+    const data = await unlockJson(url);
+    pathStats.unlocker++;
+    return data;
+  } catch (err) {
+    unlockerErr = err;
+  }
+  const res = await fetch(url, {
+    headers: { 'User-Agent': UA, Accept: 'application/json' },
+    signal: AbortSignal.timeout(20000),
+  });
+  const text = await res.text();
+  if (!res.ok || !text.trim()) {
+    throw new Error(`unlocker: ${unlockerErr.message} | direct: HTTP ${res.status}${text.trim() ? '' : ' empty'}`);
+  }
+  try {
+    const data = JSON.parse(text);
+    pathStats.direct++;
+    return data;
+  } catch {
+    throw new Error(`unlocker: ${unlockerErr.message} | direct: non-JSON body`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 1. APP-STORE REVIEWS  (story credit: "Web Scraper API")
-// Pragmatic hackathon path: Apple's public customer-review feed, fetched
-// through Web Unlocker so it works at volume and never blocks.
-// (Upgrade path: trigger the App-Store/Google-Play scraper from the Web
-//  Scraper API library via triggerDataset() in brightdata.js.)
+// Apple's public customer-review feed. Two known URL orderings — try both.
+// (Upgrade path: trigger the App-Store scraper from the Web Scraper API
+//  library via triggerDataset() in brightdata.js.)
 // ---------------------------------------------------------------------------
 
 const APPS = [
@@ -18,35 +56,51 @@ const APPS = [
 ];
 // ^ verify IDs once: the number in each app's App Store URL (apps.apple.com/us/app/xxx/idNNNNNNNNN)
 
+const reviewFeedUrls = (id, page) => [
+  `https://itunes.apple.com/us/rss/customerreviews/id=${id}/sortby=mostrecent/page=${page}/json`,
+  `https://itunes.apple.com/us/rss/customerreviews/page=${page}/id=${id}/sortby=mostrecent/json`,
+];
+
 export async function collectAppReviews({ pages = 3 } = {}) {
   const reviews = [];
   for (const app of APPS) {
     for (let page = 1; page <= pages; page++) {
-      const url = `https://itunes.apple.com/us/rss/customerreviews/page=${page}/id=${app.id}/sortby=mostrecent/json`;
-      try {
-        const data = await unlockJson(url);
-        const entries = data?.feed?.entry ?? [];
-        for (const e of entries) {
-          if (!e['im:rating']) continue; // first entry is app metadata on some pages
-          reviews.push({
-            app: app.name,
-            rating: Number(e['im:rating'].label),
-            title: e.title?.label ?? '',
-            text: (e.content?.label ?? '').slice(0, 600),
-          });
+      let lastErr = 'no entries in feed';
+      for (const url of reviewFeedUrls(app.id, page)) {
+        try {
+          const data = await jsonViaUnlockerOrDirect(url);
+          const entries = data?.feed?.entry ?? [];
+          const before = reviews.length;
+          for (const e of Array.isArray(entries) ? entries : [entries]) {
+            if (!e?.['im:rating']) continue; // first entry is app metadata on some pages
+            reviews.push({
+              app: app.name,
+              rating: Number(e['im:rating'].label),
+              title: e.title?.label ?? '',
+              text: (e.content?.label ?? '').slice(0, 600),
+            });
+          }
+          if (reviews.length > before) { lastErr = null; break; }
+        } catch (err) {
+          lastErr = err.message;
         }
-      } catch (err) {
-        console.warn(`  ! reviews ${app.name} p${page}: ${err.message}`);
       }
+      if (lastErr) console.warn(`  ! reviews ${app.name} p${page}: ${lastErr}`);
     }
   }
-  console.log(`  ✓ ${reviews.length} app-store reviews (${APPS.map((a) => a.name).join(', ')})`);
+  console.log(
+    `  ✓ ${reviews.length} app-store reviews (${APPS.map((a) => a.name).join(', ')}) — ` +
+      `${pathStats.unlocker} pages via unlocker, ${pathStats.direct} via direct fallback`
+  );
   return reviews;
 }
 
 // ---------------------------------------------------------------------------
 // 2. REDDIT THREADS  (story credit: "Crawl API")
-// Reddit's public .json endpoints, fetched through Web Unlocker.
+// Primary: reddit's public .json endpoints via Web Unlocker.
+// Fallback: reddit content via the SERP zone (site:reddit.com queries) — this
+// works on any plan, because reddit.com itself may require residential IPs
+// that trial Web Unlocker zones don't have enabled.
 // ---------------------------------------------------------------------------
 
 const REDDIT_SEARCHES = [
@@ -57,6 +111,9 @@ const REDDIT_SEARCHES = [
 
 export async function collectRedditThreads({ limit = 25 } = {}) {
   const threads = [];
+  const seen = new Set();
+  let usedFallback = false;
+
   for (const s of REDDIT_SEARCHES) {
     const url =
       `https://www.reddit.com/r/${s.sub}/search.json?q=${encodeURIComponent(s.q)}` +
@@ -65,6 +122,8 @@ export async function collectRedditThreads({ limit = 25 } = {}) {
       const data = await unlockJson(url);
       for (const child of data?.data?.children ?? []) {
         const p = child.data;
+        if (seen.has(p.permalink)) continue;
+        seen.add(p.permalink);
         threads.push({
           sub: s.sub,
           title: p.title,
@@ -74,9 +133,29 @@ export async function collectRedditThreads({ limit = 25 } = {}) {
         });
       }
     } catch (err) {
-      console.warn(`  ! reddit r/${s.sub}: ${err.message}`);
+      console.warn(`  ! reddit r/${s.sub} direct: ${err.message}`);
+      // Fallback: mine reddit through Google via the SERP zone.
+      try {
+        const data = await serp(`site:reddit.com/r/${s.sub} ${s.q}`);
+        for (const r of (data.organic ?? []).slice(0, 10)) {
+          if (!r.link || seen.has(r.link)) continue;
+          seen.add(r.link);
+          threads.push({
+            sub: s.sub,
+            title: r.title ?? '',
+            text: (r.description ?? '').slice(0, 800),
+            score: null,
+            permalink: r.link,
+            via: 'serp-fallback',
+          });
+        }
+        usedFallback = true;
+      } catch (err2) {
+        console.warn(`  ! reddit r/${s.sub} serp fallback: ${err2.message}`);
+      }
     }
   }
+  if (usedFallback) console.log('  (reddit collected via SERP fallback — snippets, not full threads)');
   console.log(`  ✓ ${threads.length} reddit threads`);
   return threads;
 }

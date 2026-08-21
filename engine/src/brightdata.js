@@ -7,7 +7,13 @@ const BASE = 'https://api.brightdata.com';
 
 function env(name) {
   const v = process.env[name];
-  if (!v) throw new Error(`Missing env var ${name} — copy .env.example and fill it in.`);
+  if (!v) {
+    throw new Error(
+      `Missing env var ${name}. Put it in engine/.env (copy .env.example). ` +
+        `If you're importing this module outside run.js, import './loadenv.js' first ` +
+        `or launch node with --env-file=.env.`
+    );
+  }
   return v;
 }
 
@@ -16,6 +22,8 @@ const authHeaders = () => ({
   Authorization: `Bearer ${env('BRIGHTDATA_API_TOKEN')}`,
 });
 
+const snip = (s, n = 140) => (s ?? '').replace(/\s+/g, ' ').slice(0, n);
+
 /** Core: fetch any URL through a Bright Data zone. */
 async function bdRequest(zone, url, format = 'raw') {
   const res = await fetch(`${BASE}/request`, {
@@ -23,8 +31,9 @@ async function bdRequest(zone, url, format = 'raw') {
     headers: authHeaders(),
     body: JSON.stringify({ zone, url, format }),
   });
-  if (!res.ok) throw new Error(`Bright Data /request ${res.status}: ${await res.text()}`);
-  return res.text();
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Bright Data /request ${res.status}: ${snip(text)}`);
+  return text;
 }
 
 /** Fetch a URL through your Web Unlocker zone (handles blocks, CAPTCHAs, fingerprints). */
@@ -32,10 +41,16 @@ export async function unlock(url) {
   return bdRequest(env('BRIGHTDATA_UNLOCKER_ZONE'), url);
 }
 
-/** Same, but parse the body as JSON (for endpoints that return JSON, e.g. reddit .json). */
+/** Same, but parse the body as JSON (for endpoints that return JSON, e.g. reddit .json).
+    Surfaces Bright Data's own plain-text errors (e.g. "Residential…" restrictions) readably. */
 export async function unlockJson(url) {
   const text = await unlock(url);
-  return JSON.parse(text);
+  if (!text || !text.trim()) throw new Error('empty body from unlocker');
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`non-JSON body from unlocker: "${snip(text)}"`);
+  }
 }
 
 /** Google search through the SERP zone. `brd_json=1` asks Bright Data to parse the SERP for you. */

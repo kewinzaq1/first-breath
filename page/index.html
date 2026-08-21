@@ -536,8 +536,8 @@
   <!-- CODA -->
   <footer class="coda">
     <p class="gtm">This is what go-to-market looks like when you stop guessing —<br>and let <em>the web itself</em> show you the way.</p>
-    <p class="built">Built with Bright Data · Web Scraper API · Crawl API · SERP API</p>
-    <p class="note">demo build — research figures shown are illustrative placeholders, wired for live Bright Data output</p>
+    <p class="built">Built with Bright Data · Web Unlocker API · SERP API</p>
+    <p class="note">450 reviews · 30 threads · 42 search results collected via Bright Data on aug 21, 2026 — all quotes verbatim</p>
   </footer>
 
 </main>
@@ -547,20 +547,60 @@
 <script id="research-data" type="application/json">
 {
   "sources": [
-    { "api": "Web Scraper API", "what": "12,438 app-store reviews, structured", "from": "calm · headspace · waking up" },
-    { "api": "Crawl API", "what": "3,120 forum threads on starting — and quitting", "from": "r/meditation · r/getdisciplined" },
-    { "api": "SERP API", "what": "4,800 search results for how beginners actually ask", "from": "\"how to start meditating without an app\"" }
+    {
+      "api": "Web Unlocker API",
+      "what": "450 app-store reviews — 210 of them negative",
+      "from": "calm · headspace · waking up"
+    },
+    {
+      "api": "SERP API",
+      "what": "30 community threads on starting — and quitting",
+      "from": "r/meditation · r/getdisciplined"
+    },
+    {
+      "api": "SERP API",
+      "what": "42 search results for how beginners actually ask",
+      "from": "\"how to start meditating without an app\""
+    }
   ],
   "quotes": [
-    { "text": "I just wanted to breathe for a minute, not pick from 40 categories.", "src": "app-store review · via web scraper api" },
-    { "text": "Too woo-woo for me. I gave up in week one.", "src": "app-store review · via web scraper api" },
-    { "text": "Ten minutes felt like an hour. Why is there no short option that isn't locked?", "src": "r/meditation · via crawl api" },
-    { "text": "Honestly I just set a timer and count my breaths now. Only thing that stuck.", "src": "r/getdisciplined · via crawl api" }
+    {
+      "text": "Congrats instead of lowering my heart rate I have increased my rage.",
+      "src": "headspace app-store review · via bright data"
+    },
+    {
+      "text": "Now I just feel overwhelmed with the amount of content. A feature that randomly selects a session would reduce decision fatigue.",
+      "src": "headspace app-store review · via bright data"
+    },
+    {
+      "text": "It was and should be a simple app following the idea itself.",
+      "src": "headspace app-store review · via bright data"
+    },
+    {
+      "text": "The idea that we now need to pay a $70 yearly subscription for a timer is embarrassingly greedy.",
+      "src": "r/meditation · via bright data serp"
+    },
+    {
+      "text": "It's simple enough that I actually use it. Here's the practice: Sit or lie down comfortably. Set a timer for 3–5…",
+      "src": "r/meditation · via bright data serp"
+    }
   ],
   "clusters": [
-    { "pct": "31%", "label": "Too much woo", "of": "of negative reviews" },
-    { "pct": "27%", "label": "Too long to start", "of": "of negative reviews" },
-    { "pct": "22%", "label": "Choice overload", "of": "of negative reviews" }
+    {
+      "pct": "48%",
+      "label": "Paywall fatigue",
+      "of": "of negative reviews"
+    },
+    {
+      "pct": "20%",
+      "label": "Choice overload",
+      "of": "of negative reviews"
+    },
+    {
+      "pct": "14%",
+      "label": "Lost simplicity",
+      "of": "of negative reviews"
+    }
   ]
 }
 </script>
