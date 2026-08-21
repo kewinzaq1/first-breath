@@ -73,3 +73,7 @@ Nothing in the pipeline is meditation-specific. Swap the app IDs, subreddits, an
 - Quotes are used verbatim for research/demo purposes; respect target-site ToS beyond the demo. Bright Data's compliance layer is part of the story.
 
 MIT licensed. Built with Bright Data SERP API · Apple's public review feed · Claude. (Web Unlocker and Web Scraper API paths are wired and ready once the account has KYC.)
+
+## Talk deck
+
+`docs/first-breath-how-it-works.pptx` — ten slides, pain → proof → fix → how. Regenerate with `node docs/deck.js` (needs `pptxgenjs`). Every quote and number on it is the same `research.json`/corpus as the page.
