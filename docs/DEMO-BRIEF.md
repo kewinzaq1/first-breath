@@ -1,108 +1,100 @@
 # Demo brief — morning of Aug 22, 2026
 
-You are a coding agent preparing Kew's demo for the Bright Data GTM event tonight. Read `AGENTS.md` first (environments, hard rules, lessons). This file is the plan; it overrides anything in older docs that contradicts it. **The story below is decided. Do not re-litigate it — build it.**
+You are a coding agent preparing Kew's demo for the Bright Data GTM event tonight. Read `AGENTS.md` for environments, hard rules and hard-won lessons. This file is the plan and overrides every older narrative doc. **The product below is decided. Build it; do not redesign it.**
 
-Budget: ~4 hours. Work the steps in order; each ends on a checkable bar. If a step blows its timebox, take its fallback and move on — a finished demo beats a perfect one.
-
----
-
-## The story (fixed)
-
-**Problem.** Meditation apps sell calm and deliver a marketplace: ten thousand sessions, streaks, paywalls. Worse — even when it works, the calm stays on the cushion. You sit for twenty minutes, feel present, then snap at your kid at 6pm, eat the second plate, scroll until 2am. The practice never reaches the moment where life actually happens.
-
-**Hypothesis.** H1: apps overwhelm people with content and choice. H2: the calm stays in the session; people are still reactive in real life. Bet: **Moment** (https://moment.szlezingier.com) — one sentence about how you want to move through today, a pause every 30 minutes, one minute to breathe and choose again. Meditation inside the day, not beside it.
-
-**Method.** Before pitching it, Kew asked the web to break it. One Node engine wired to Bright Data — three APIs, each used for what it's best at — plus a coding agent that turned raw rows into a research object and injected it into a page. A third of the queries were written to refute the hypothesis.
-
-**Result.** H1 held (48% paywall fatigue, 20% choice overload of 210 negative reviews). H2 held for the people it fails — "when another same trigger arose, I was still reactive" — and they prescribe the bridge themselves. **The web pushed back:** Mindfulness Bell, MindBell, Chill and One-Moment Meditation® already exist; the bell and the minute are taken. What no result offers: remembering *your own intention* at the moment it matters (r/selfimprovement: "23 minutes later I'm in the thick of it").
-
-**The moment that lingers.** The room writes one sentence. Sixty seconds of silence. The sentence comes back mid-breath. "Now choose again." In a night of agent demos, this is the one where 200 people breathe together.
-
-Arc, in order: *pain → the bet → "prove me wrong" → the three calls → what held → what pushed back → the sharpened product → the room does it.* Page, deck and talk all follow this order, beat for beat.
+Budget: ~5 hours. Work the steps in order; each ends on a checkable bar. When a step blows its timebox, take its fallback and move on.
 
 ---
 
-## What exists and works (verified Aug 22, 01:00)
+## The product: Prove Me Wrong
 
-- `page/index.html` — the Moment story, published at the artifact URL in `AGENTS.md`. Final scene is a working one-minute Moment (intention input → 6 breaths → intention returns → CTA).
-- `engine/src/run.js` — collect (Apple reviews via public feed, reddit via SERP `site:`, 5 SERP queries) → analyze → inject. `--collect-only`, `--inject-only`.
-- `engine/src/question.js` — 12-query hypothesis sweep → `out/moment-serp.json` (104 rows, ran fine).
-- `engine/src/ask.js` — one SERP call printed for a room. ~1.8 s. The rehearsed live step.
-- `engine/src/brightdata.js` — `serp()`, `unlock()`, `unlockJson()`, and `triggerDataset()` / `waitForSnapshot()` for the Web Scraper API (**wired, never run**).
-- `engine/out/research.json` — the Moment research object (quotes verbatim, clusters computed, `hypothesis.verdict`, `counter_evidence`). `research.first-breath.json` is the old timer-product version; reference only.
-- `docs/first-breath-how-it-works.pptx` ← `docs/deck.js` (pptxgenjs), `docs/TALK.md`.
-- Known API facts: SERP zone works for everything. Web Unlocker: **Google Play resolves (200, 1.2 MB)**; Apple hosts and reddit are policy-gated (`destination_ip_prohibited`, needs KYC). Anthropic API key has no credits — analysis is done by *you*, in-session, from the corpus.
+**What it is.** A tool for founders who are too attached to their idea. You give it your hypothesis in two sentences, the community where your users tell the truth, and the names of your would-be competitors. It goes to the web through Bright Data and comes back with a verdict page: *what held, what was refuted, what nobody is doing* — every line a verbatim quote or a computed number, every source credited by the path that served it.
+
+**Why it lands at a Bright Data event.** It is not "an AI agent". It is a product whose only moving part is Bright Data — three APIs, each doing the job it's best at — with a coding agent as the analyst. The audience leaves with a loop they can run on their own idea tonight.
+
+**The pain (real, and the emotional arc).** Every founder in the room has shipped a positioning that the web could have refuted for five dollars. We don't check, because we're afraid of the answer. Prove Me Wrong makes the web the honest friend: it searches for the people who disagree with you first.
+
+**The worked example (Kew's own idea).** Moment — "meditation inside the day, not beside it." Hypothesis H1: apps overwhelm; H2: the calm stays on the cushion. The tool found: H1 held (48% paywall fatigue, 20% choice overload of 210 negative reviews). H2 held for the people it fails ("when another same trigger arose, I was still reactive"). **Refuted:** Mindfulness Bell, MindBell, Chill, One-Moment Meditation® already exist — the bell and the minute are taken. **Unclaimed:** remembering *your own intention* at the moment it matters ("23 minutes later I'm in the thick of it", r/selfimprovement #1). A wrong positioning and a trademark collision, caught before launch. That is the demo's proof that the product works.
+
+**The lingering moment.** Kew runs it live on his own idea and reads the refutation out loud. Then takes one hypothesis from the room and runs it — 30 seconds, real results, on stage. Founders watching their idea get argued with, in public, by the web. That beats "AI agent" #99999.
+
+Arc, in order: *the founder's fear → "give it your idea" → the three calls (what each API does) → Moment: what held → Moment: what was refuted → the unclaimed job → live on a stranger's idea → the recipe.*
+
+---
+
+## What exists (verified Aug 22, 01:00) — reuse, don't rebuild
+
+- `engine/src/brightdata.js` — `serp()` (SERP zone, `brd_json=1`), `unlock()`/`unlockJson()` (Web Unlocker), `triggerDataset()`/`waitForSnapshot()` (Web Scraper API; wired, never run).
+- `engine/src/collect.js` — Apple reviews (public feed; Unlocker is policy-gated there), reddit via SERP `site:` (KYC workaround), SERP landscape. `pathStats` tracks which path served.
+- `engine/src/question.js` — the 12-query hypothesis sweep for Moment (buckets: gap / want / competition). **This is the seed of the product.**
+- `engine/src/ask.js` — one SERP call printed for a room (~1.8 s).
+- `engine/out/corpus.json`, `moment-serp.json`, `research.json` — Moment's real run. Irreplaceable; never overwrite.
+- `page/index.html` — a data-driven scroll story, single file, renders `research-data` blob (sources/quotes/clusters). Final scene is a one-minute Moment.
+- API facts: SERP works for everything. Unlocker: Google Play resolves (200, 1.2 MB); Apple hosts + reddit need KYC. Anthropic API key has no credits — *you* are the analyst, in-session.
 
 ---
 
 ## Steps
 
-### 1 · Consolidate (30 min)
+### 1 · Generalize the engine into the product (90 min)
 
-The project feels scattered because three narratives accumulated (First Breath timer → pain/proof deck → Moment). Leave exactly one.
+Input file `engine/hypothesis.json`:
 
-- Every file in `docs/`, `README.md`, `SPEC.md`, `docs/ARCHITECTURE.md` describes the Moment story above. "First Breath" survives only as the repo/artifact name with a one-line note.
-- `engine/out/research.json` has `quotes` (3–5), `clusters` (3), `sources` (3) matching the page blob byte-for-byte after `--inject-only`.
-- Delete nothing from `engine/out/` (corpora are irreplaceable). Delete scratch from `docs/` that the arc doesn't use.
+```json
+{ "product": "Moment", "url": "https://moment.szlezingier.com",
+  "hypotheses": { "H1": "…", "H2": "…" },
+  "community": ["reddit.com/r/Meditation", "reddit.com/r/selfimprovement"],
+  "competitors": ["Calm", "Headspace", "Waking Up"],
+  "apps": { "apple": ["571800810", "493145008", "1307736395"], "play": ["com.calm.android", "com.getsomeheadspace.android", "org.wakingup.android"] } }
+```
 
-**Done when:** `grep -ril "first breath" docs README.md SPEC.md` returns only the naming note, and a stranger reading `README.md` alone can retell the eight beats.
+`node src/provemewrong.js` (new; `loadenv.js` first import) runs three phases and writes `out/verdict-input.json`:
 
-### 2 · Third API: Web Scraper API for Google Play reviews (60 min, hard stop)
+1. **SERP API — the argument.** Generate queries from the hypotheses in three buckets: *gap* (phrases that would confirm), *refute* (the opposite: "…actually works", "…does carry over"), *competition* ("<category> app", "<mechanism> app"). Plus `site:<community>` variants. Record `bucket`, `query`, rank, title, link, snippet, `people_also_ask`, `related`. Bar: ≥ 12 queries, ≥ 4 in *refute*.
+2. **Web Unlocker — the full text.** For the top 5 non-reddit organic links in *gap* and *competition* (blogs, competitor landing pages, app-store pages that resolve), `unlock()` the page and keep `<title>`, meta description, and the first 1,500 chars of visible text. Record `via: "web-unlocker"` and, for policy-gated hosts, the error string verbatim. Bar: ≥ 5 pages fetched, failures recorded not hidden.
+3. **Web Scraper API — reviews at scale.** `GET /datasets/list`, find the Google Play reviews scraper, `triggerDataset` for `apps.play` with `limit_per_input: 100`, `waitForSnapshot` → `out/play-reviews.json` (`via: "web-scraper-api"`). **Timebox 40 min.** Fallback: `unlock()` the three Play store pages and extract embedded reviews (`via: "web-unlocker"`). Either way the Apple public-feed path from `collect.js` still runs for the 450 reviews that the clusters are computed from.
 
-The talk claims three APIs. Make the third one real with a source the Unlocker can also reach, so the story has a clean "each API for what it's best at" beat:
+Then the **coding agent as analyst**: write `out/analysis-prompt.md` (reuse `analyze.js buildPrompt` shape) and produce `out/research.json` yourself from the rows: `sources[3]`, `quotes[3–5]`, `clusters[3]`, `hypothesis.verdict {H1,H2,pushback,unclaimed}`, `counter_evidence[]`, `meta.attribution`. Moment's existing `research.json` is the reference answer — the new run must reproduce its verdicts from fresh rows or explain the difference in `meta`.
 
-1. List datasets: `GET https://api.brightdata.com/datasets/list` (Bearer). Find the Google Play reviews scraper (name contains "Google Play" and "review"). If the list endpoint is unavailable, Kew must copy the `dataset_id` from the control panel (Web Scrapers → Google Play → reviews) — ask once, proceed with the fallback meanwhile.
-2. `node src/play.js` (new): `triggerDataset(id, [{url: <play store url>}×3 apps], {limit_per_input: 100})` → `waitForSnapshot` → `out/play-reviews.json`. Apps: `com.calm.android`, `com.getsomeheadspace.android`, `org.wakingup.android`.
-3. Record the serving path in the file (`via: "web-scraper-api"`), count negatives (rating ≤ 2), print the one-line summary the talk will quote.
+**Done when:** `node src/provemewrong.js` runs green from `hypothesis.json`, prints a one-line path summary per API (`serp 104 rows · unlocker 5/7 pages (2 policy-gated) · scraper 287 reviews`), and `research.json` is regenerated with all quotes traceable to a row in `out/`.
 
-**Fallback** (if no dataset in 30 min or snapshot not ready in 20): `unlock()` the three Play store pages (this works), extract the reviews embedded in the page HTML, save with `via: "web-unlocker"`. Either way, the Unlocker gets a real credit (the Play page fetch) and the story stays honest.
+### 2 · The verdict page (60 min)
 
-**Done when:** `out/play-reviews.json` exists with ≥ 30 reviews and a `via` field, and the page's first source card reads e.g. `App Store feed · public API + Google Play · Web Scraper API` with real counts. **Clusters stay computed from the 210 Apple negatives** — do not blend corpora into a percentage you didn't compute. If you add Play negatives to the cluster math, recompute and record the method in `research.json.meta`.
+`page/index.html` becomes the product's output template. Keep the design system (dark, ember = human voice, blue = machine voice), the single-file rule and the blob contract — extend the blob with `product`, `hypotheses`, `verdict`, `counter_evidence`, and render them:
 
-### 3 · Page (45 min)
+- Hero: `product` + "Prove Me Wrong" eyebrow + the two hypotheses as the fear ("this is what I believed").
+- The ask: three source cards, one per API, with the path that actually served.
+- The reveal: quotes (held), clusters, then the **pushback block** (counter-evidence list, blue) and the **unclaimed job** (ember).
+- Final scene: the product's own CTA from `hypothesis.json` (for Moment: the one-minute Moment, already built; for any other product: a link). Keep the Moment scene as the example's ending — it's the emotional close.
+- `run.js --inject-only` round-trips byte-identical. Headless pass at 1920×1080 and 390×844, zero `PAGEERROR`. Republish to the **same artifact URL**.
 
-Copy is close; make it final against the arc. Then the checks that matter on a projector:
+**Done when:** the page renders entirely from the blob (no Moment-specific copy outside `hypothesis.json`/`research.json`), and the live URL shows it.
 
-- Hero subline names the pain in one breath (not the method).
-- "Half of it held. Half of it pushed back." reveal keeps the pushback line visible on one 1080p screen with the clusters.
-- Final scene: placeholder intention is a real sentence; `Enter` starts; `Escape` aborts; after completion the CTA to moment.szlezingier.com is above the fold at 1080p.
-- Headless pass at 1920×1080 and 390×844 (`.claude/launch.json` serves `page/` on :8765; Brave via playwright-core at `/Applications/Brave Browser.app`). Zero `PAGEERROR`.
-- Republish to the **same artifact URL**. Kew must unpin the old version in the artifact UI — remind them in your final message.
+### 3 · Live run on a stranger's idea (45 min)
 
-**Done when:** a full scroll + one completed Moment run headlessly with no console errors at both sizes, and the live URL serves the new title.
+The stage needs a 30-second path. `node src/ask.js "<query>"` already exists; add `node src/provemewrong.js --quick "<hypothesis sentence>" --community reddit.com/r/<sub>` which runs **SERP only** (4 queries: 2 gap, 1 refute, 1 competition) and prints: top result per bucket with snippet, then one line — `held / refuted / unclaimed` — derived by simple rules (competition bucket has a product in top 3 → "mechanism exists"; refute bucket top result agrees with you → "held"). Label it honestly on screen as *"first pass — the full run takes four minutes"*. Bar: runs in < 30 s on three different hypotheses you invent; never throws on an empty bucket.
 
-### 4 · Deck (45 min)
+### 4 · Deck + talk (60 min)
 
-`docs/deck.js` → ≤ 10 slides in the arc order. Bright Data is the subject; Moment the example. Slide 3 shows the three real request shapes; slide "what pushed back" is the ROI slide; slide "live" shows the exact `ask.js` output as an offline fallback. Build with `node docs/deck.js` (pptxgenjs via `NODE_PATH` or local install), validate with the pptx skill's `validate.py`, and look at every slide in PowerPoint (it's installed; `open -a "Microsoft PowerPoint"`). Fix overflow and collisions before moving on.
+`docs/deck.js` → ≤ 10 slides in the arc order, Bright Data as the subject: (1) the founder's fear, (2) give it your idea — `hypothesis.json`, (3) the three calls with real request shapes, (4) SERP: queries written to refute + `site:`, (5) Unlocker: full text + policy gates designed for, (6) Scraper API: reviews at scale, (7) Moment: what held, (8) Moment: refuted + unclaimed (the ROI slide), (9) live — `--quick` output as offline fallback, (10) recipe + links. Validate with the pptx skill, view every slide in PowerPoint.
 
-**Done when:** validator passes and every slide has been viewed at full size.
+`docs/TALK.md` → ≤ 5:00 including one live run (≈ 40 s). Proxy-read ≤ 4:40. Every claim traceable to `research.json`.
 
-### 5 · Talk (30 min)
+### 5 · Stage kit (30 min)
 
-`docs/TALK.md`: ≤ 5:00 with the live call inside it, beat for beat with the deck. Spoken ≈ 520 words. Include: cut lines if running long, the "wifi dies" fallback, four likely questions. Then **read it aloud with a timer** (use `say` at 170 wpm as a proxy if Kew isn't there) and trim until 4:40.
-
-**Done when:** the proxy read is ≤ 4:40 and every claim in it appears verbatim in `research.json` or `moment-serp.json`.
-
-### 6 · Stage kit (30 min)
-
-- Terminal profile: `cd engine && node src/ask.js "how to remember my intention for the day"` runs green in a fresh shell (proves `.env` loading on this machine). Font ≥ 18pt.
-- Optional, only if everything above is done: `claude mcp add brightdata -e API_TOKEN=<from .env> -- npx -y @brightdata/mcp` and rehearse one prompt ("search reddit for people who say meditation didn't change their behavior; quote the top three") so Kew can show a coding agent using Bright Data conversationally. If it's flaky, leave it out — `ask.js` is the demo.
-- Offline pack in `docs/stage/`: PNG of each deck slide, PNG of `ask.js` output, PNG of the page's final scene. If the venue network dies, the talk still runs.
-- `docs/CHECKLIST.md`: the 10-line pre-stage checklist (artifact unpinned, terminal green, deck open on slide 1, page open on scene 1, phone timer, water).
-
-**Done when:** every item in `CHECKLIST.md` has been executed once by you.
+Fresh-shell smoke test of `ask.js` and `--quick`; offline PNGs of every slide, both live outputs and the page's reveal + final scene in `docs/stage/`; `docs/CHECKLIST.md` (artifact unpinned, terminal font ≥ 18pt, deck on slide 1, page on scene 1, a second hypothesis ready in case the room is shy: *"Developers want an AI code reviewer that blocks merges"* with `r/ExperiencedDevs`).
 
 ---
 
-## Hard rules (these are the demo's integrity claim — break one and the talk is a lie)
+## Hard rules (the product's integrity claim)
 
-1. Every quote verbatim from `out/corpus.json`, `out/moment-serp.json` or `out/play-reviews.json`; light `…` trimming only.
-2. Every percentage computed from a corpus you can point to; method recorded in `research.json.meta`.
-3. Every source credited by the path that actually served it. `collect.js` counts it; the page says it.
-4. The page stays one self-contained file with the `research-data` blob contract intact; the renderer stays above the observers.
-5. Same artifact URL, always.
-6. `.env` values are never printed, logged, or committed.
+1. Every quote verbatim from a row in `engine/out/`; light `…` trimming only.
+2. Every percentage computed from a corpus you can point to; method in `research.json.meta`.
+3. Every source credited by the path that actually served it — including the gated ones, with the error text.
+4. Page stays one self-contained file; blob contract extended in `run.js inject()` **and** the renderer in the same change; renderer above the observers.
+5. Same artifact URL, always. `.env` values never printed or committed.
+6. Moment's original run (`corpus.json`, `moment-serp.json`, `research.json` as of this morning) is preserved under `out/moment-2026-08-21/` before any new run writes to `out/`.
 
 ## Final message to Kew
 
-One screen: what is live (URLs), what the three APIs did (with counts), the one thing only they can do (unpin the artifact), and the sentence to open with. Nothing else.
+One screen: the live URL; the three APIs with real counts from today's run; the `--quick` command to type on stage; the one thing only Kew can do (unpin the artifact; `dataset_id` if the list endpoint failed); the opening sentence: *"Every founder in this room has shipped a positioning the web could have refuted for five dollars. I built the thing that asks."*

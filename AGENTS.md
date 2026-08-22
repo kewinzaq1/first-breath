@@ -17,7 +17,7 @@ A go-to-market story told by the web itself. Kew teaches pragmatic meditation ("
 
 ## Demo-day plan
 
-`docs/DEMO-BRIEF.md` is the step-by-step plan for the morning of Aug 22 (consolidate → third API via Web Scraper → page → deck → talk → stage kit), with completion bars and fallbacks. Follow it before anything below.
+`docs/DEMO-BRIEF.md` is the plan for the morning of Aug 22. **The product is Prove Me Wrong** — a hypothesis-breaker built on Bright Data's three APIs with a coding agent as analyst; Moment is its worked example, not the subject. Follow the brief before anything below; where this file and the brief disagree, the brief wins.
 
 ## The story (the one argument everything serves)
 
