@@ -24,6 +24,17 @@ const injectOnly = process.argv.includes('--inject-only');
 
 console.log('▸ First Breath research engine\n');
 
+/** The page's data contract: sources/quotes/clusters always; Prove Me Wrong fields when present. */
+export function blobOf(research) {
+  const { sources, quotes, clusters, product, hypotheses, verdict, counter_evidence } = research;
+  const blob = { sources, quotes, clusters };
+  if (product) blob.product = product;
+  if (hypotheses) blob.hypotheses = hypotheses;
+  if (verdict) blob.verdict = verdict;
+  if (counter_evidence) blob.counter_evidence = counter_evidence;
+  return blob;
+}
+
 async function inject(research) {
   console.log('3/3 Injecting into landing page…');
   const pagePath = PAGE_PATHS.find((p) => existsSync(p));
@@ -38,8 +49,7 @@ async function inject(research) {
     console.log(`  ! no research-data block in ${pagePath} — is this the data-driven version of the page?`);
     return;
   }
-  const { sources, quotes, clusters } = research;
-  const blob = JSON.stringify({ sources, quotes, clusters }, null, 2);
+  const blob = JSON.stringify(blobOf(research), null, 2);
   await writeFile(pagePath, html.replace(re, `$1\n${blob}\n$2`));
   console.log(`  ✓ injected into ${pagePath} — republish the page and the story runs on real data.`);
 }

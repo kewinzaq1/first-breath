@@ -44,8 +44,8 @@ function normalize(row) {
   };
 }
 
-async function viaWebScraperApi() {
-  let snapshotId = after('--snapshot');
+async function viaWebScraperApi(existingSnapshotId) {
+  let snapshotId = existingSnapshotId;
   if (!snapshotId) {
     const inputs = APPS.map((a) => ({ url: playUrl(a.id) }));
     console.log(`▸ POST https://api.brightdata.com/datasets/v3/trigger?dataset_id=${DATASET_ID}&limit_per_input=100`);
@@ -100,8 +100,33 @@ async function viaUnlocker() {
   return { via: 'web-unlocker', pages, reviews };
 }
 
+/** Programmatic entry: { via, reviews, counts, … } — used by provemewrong.js. */
+export async function collectPlayReviews({ snapshotId, unlocker = false } = {}) {
+  const result = unlocker ? await viaUnlocker() : await viaWebScraperApi(snapshotId);
+  const reviews = result.reviews;
+  const negative = reviews.filter((r) => r.rating != null && r.rating <= 2);
+  const negative3 = reviews.filter((r) => r.rating != null && r.rating <= 3);
+  const perApp = Object.fromEntries(APPS.map((a) => [a.name, reviews.filter((r) => r.app === a.name).length]));
+  return {
+    collected: new Date().toISOString().slice(0, 10),
+    via: result.via,
+    api: result.via === 'web-scraper-api' ? 'Web Scraper API' : 'Web Unlocker API',
+    dataset_id: result.via === 'web-scraper-api' ? DATASET_ID : undefined,
+    snapshot_id: result.snapshotId,
+    pages: result.pages,
+    apps: APPS,
+    counts: { reviews: reviews.length, negative: negative.length, negativeDefinition: 'rating ≤ 2', negativeAtOrBelow3: negative3.length, perApp },
+    reviews,
+    raw: result.raw,
+  };
+}
+
+const isMain = process.argv[1] && process.argv[1].endsWith('play.js');
+if (!isMain) {
+  // imported as a module — nothing else runs
+} else {
 await mkdir('out', { recursive: true });
-const result = flag('--unlocker') ? await viaUnlocker() : await viaWebScraperApi();
+const result = flag('--unlocker') ? await viaUnlocker() : await viaWebScraperApi(after('--snapshot'));
 const { reviews } = result;
 const negative = reviews.filter((r) => r.rating != null && r.rating <= 2);
 const negative3 = reviews.filter((r) => r.rating != null && r.rating <= 3); // same definition collect.js/clusters.js use for Apple
@@ -123,3 +148,4 @@ const outFile = after('--out') ?? 'out/play-reviews.json';
 await writeFile(outFile, JSON.stringify(file, null, 2));
 console.log(`→ ${outFile}`);
 console.log(`  ${reviews.length} Google Play reviews (${APPS.map((a) => `${a.name} ${perApp[a.name]}`).join(' · ')}) — ${negative.length} negative at rating ≤ 2, ${negative3.length} at ≤ 3 · via ${file.api}`);
+}

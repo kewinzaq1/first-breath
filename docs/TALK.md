@@ -31,7 +31,7 @@ Both halves held. Two hundred and ten negative App Store reviews, classified by 
 
 ## 2:40 — Slide 6 · What pushed back (35 s)
 
-And here is the slide that paid for the evening. The interrupt already exists — Mindfulness Bell, MindBell, Chill. The minute already exists — One-Moment Meditation, and it's a registered trademark. Insight Timer owns the search. So I cannot position Moment as a reminder app. But a *want* query found the number-one result on r/selfimprovement: "How to remember my set intention for the day? 23 minutes later I'm in the thick of…" Nobody in a hundred results does that. The bell is taken, the minute is taken, the intention is not. A wrong positioning and a trademark collision, caught for a few dollars of API calls.
+And here is the slide that paid for the evening. The interrupt already exists — Mindfulness Bell, MindBell, Chill. The minute already exists — One-Moment Meditation holds the top two results for "one minute meditation reminder app", and it's a registered trademark. So I cannot position Moment as a reminder app. But a *want* query found the number-one result on r/selfimprovement: "How to remember my set intention for the day? 23 minutes later I'm in the thick of…" Nobody in a hundred results does that. The bell is taken, the minute is taken, the intention is not. A wrong positioning and a trademark collision, caught for a few dollars of API calls.
 
 ## 3:15 — Slide 7 · The sharpened product (20 s)
 

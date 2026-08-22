@@ -12,6 +12,17 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { CLASSES, computeClusters, negative } from './clusters.js';
 
+// same contract as run.js inject() — kept in one place so the two can never drift
+function blobOf(research) {
+  const { sources, quotes, clusters, product, hypotheses, verdict, counter_evidence } = research;
+  const blob = { sources, quotes, clusters };
+  if (product) blob.product = product;
+  if (hypotheses) blob.hypotheses = hypotheses;
+  if (verdict) blob.verdict = verdict;
+  if (counter_evidence) blob.counter_evidence = counter_evidence;
+  return blob;
+}
+
 const norm = (s) => String(s ?? '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim();
 const research = JSON.parse(await readFile('out/research.json', 'utf8'));
 const corpus = JSON.parse(await readFile('out/corpus.json', 'utf8'));
@@ -56,9 +67,8 @@ else {
   const m = html.match(/<script id="research-data" type="application\/json">\s*([\s\S]*?)\s*<\/script>/);
   if (!m) bad('no research-data block in page');
   else {
-    const { sources, quotes, clusters } = research;
-    const expected = JSON.stringify({ sources, quotes, clusters }, null, 2);
-    if (m[1] === expected) ok('page blob is byte-identical to research.json {sources, quotes, clusters}');
+    const expected = JSON.stringify(blobOf(research), null, 2);
+    if (m[1] === expected) ok('page blob is byte-identical to research.json (sources, quotes, clusters' + (research.product ? ', product, hypotheses, verdict, counter_evidence' : '') + ')');
     else bad('page blob differs from research.json — run: node src/run.js --inject-only');
   }
 }

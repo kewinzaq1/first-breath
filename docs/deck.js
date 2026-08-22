@@ -102,8 +102,8 @@ const card = (s, x, y, w, h, c) => s.addShape(p.ShapeType.rect, { x, y, w, h, fi
   title(s, 'The web refuted my positioning. The interrupt and the minute both already exist.', 0.85, 24, 1.0);
   const comp = [
     ['Mindfulness Bell · MindBell · Chill', 'interval or random bells, all day'],
-    ['One-Moment Meditation®', 'one-minute exercise + reminders — and a registered mark'],
-    ['Insight Timer', 'owns the SERP for “one minute meditation reminder app”'],
+    ['One-Moment Meditation®', 'one-minute exercise + reminders — a registered mark'],
+    ['One-Moment Meditation® · #1 and #2', 'for “one minute meditation reminder app” — the minute is taken'],
   ];
   comp.forEach(([h, t], i) => { const y = 2.05 + i * 0.7;
     s.addShape(p.ShapeType.ellipse, { x: 0.6, y: y + 0.08, w: 0.13, h: 0.13, fill: { color: DATA }, line: { width: 0 } });

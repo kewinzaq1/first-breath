@@ -1,0 +1,35 @@
+{
+  "product": "Moment",
+  "url": "https://moment.szlezingier.com",
+  "tagline": "meditation inside the day, not beside it",
+  "hypotheses": {
+    "H1": "Meditation apps overwhelm people with content and choice.",
+    "H2": "The calm stays in the session: people are still reactive in real life."
+  },
+  "community": ["reddit.com/r/Meditation", "reddit.com/r/selfimprovement"],
+  "competitors": ["Calm", "Headspace", "Waking Up"],
+  "apps": {
+    "apple": ["571800810", "493145008", "1307736395"],
+    "play": ["com.calm.android", "com.getsomeheadspace.android", "org.wakingup.android"]
+  },
+  "queries": {
+    "gap": [
+      "meditate every day but still reactive",
+      "meditation doesn't carry over into daily life",
+      "calm during meditation but anxious the rest of the day",
+      "site:reddit.com/r/Meditation still reactive after years of meditation",
+      "site:reddit.com/r/selfimprovement how to remember my intention for the day"
+    ],
+    "refute": [
+      "meditation made me less reactive",
+      "does meditation carry over into daily life",
+      "site:reddit.com/r/Meditation meditation changed how I react",
+      "meditation app helped me stick with it"
+    ],
+    "competition": [
+      "mindfulness reminder app throughout the day",
+      "mindfulness bell app random reminders",
+      "one minute meditation reminder app"
+    ]
+  }
+}

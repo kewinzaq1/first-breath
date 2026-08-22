@@ -482,6 +482,14 @@
     letter-spacing: 0.05em;
   }
 
+  .hero-eyebrow { margin-top: 2.6rem; }
+  .hero-eyebrow + h1 { margin-top: 0.8rem; }
+  .hyps { margin: 2.2rem auto 0; max-width: 30rem; text-align: left; display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; }
+  .hyps dt { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; color: var(--data); padding-top: 0.35rem; }
+  .hyps dd { color: var(--muted); font-size: 1rem; line-height: 1.55; }
+  .gap a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--data-dim); }
+  .gap a:hover, .gap a:focus-visible { color: var(--data); outline: none; }
+
   /* projector / large displays: scale the whole system up */
   @media (min-width: 1500px) {
     html { font-size: 21px; }
@@ -505,7 +513,8 @@
   <!-- 1 · HERO -->
   <section class="scene hero center">
     <div class="orb" aria-hidden="true"></div>
-    <h1 class="rv">Moment</h1>
+    <p class="eyebrow data-voice rv hero-eyebrow" id="heroEyebrow" hidden></p>
+    <h1 class="rv" id="productName">Moment</h1>
     <p class="sub rv d2">Twenty minutes of calm on the cushion. Then the day happens — and you snap at your kid&nbsp;anyway.</p>
     <div class="scroll-hint" aria-hidden="true">scroll</div>
   </section>
@@ -536,6 +545,7 @@
       <p class="eyebrow rv d1">my hypothesis</p>
       <h2 class="rv d2">Two things are broken.</h2>
       <p class="steps rv d3">The apps overwhelm you. And the calm never leaves the&nbsp;session.</p>
+      <dl class="hyps rv d3" id="hyps" hidden></dl>
       <p class="doubt rv d4">So I built Moment: one intention, a pause every thirty minutes, one minute to choose again. Meditation inside the day, not beside it. That was the bet. But a bet is not a business — so before telling anyone, I tried to break&nbsp;it.</p>
     </div>
   </section>
@@ -560,7 +570,7 @@
 
       <div class="clusters" id="clusters"></div>
 
-      <p class="gap rv">the pushback · <b>the interrupt is not new</b><br>mindfulness bell · mindbell · chill · one-moment meditation® — all exist. insight timer owns "one minute meditation reminder app".<br>what no result offers: remembering <b>your own intention</b> at the moment it matters.</p>
+      <p class="gap rv" id="gap">the pushback · <b>the interrupt is not new</b><br>mindfulness bell · mindbell · chill · one-moment meditation® — all exist. one-moment meditation® holds #1 and #2 for "one minute meditation reminder app".<br>what no result offers: remembering <b>your own intention</b> at the moment it matters.</p>
 
       <p class="verdict rv">The bell is taken. The minute is taken.<br>What people lose by 9am is <em>the sentence they chose at 7.</em></p>
     </div>
@@ -589,7 +599,7 @@
     <div class="after-breath" id="afterBreath">
       <p class="thats" id="afterIntention">That's one moment.</p>
       <p class="after-note">Moment hands you this sentence every thirty minutes, in the hours you choose.</p>
-      <a class="begin link" href="https://moment.szlezingier.com" target="_blank" rel="noopener">Start your first minute →</a>
+      <a class="begin link" id="productCta" href="https://moment.szlezingier.com" target="_blank" rel="noopener">Start your first minute →</a>
     </div>
     <button class="begin" id="beginBtn">Begin · one minute</button>
   </section>
@@ -662,6 +672,53 @@
       "label": "Choice overload",
       "of": "of negative reviews"
     }
+  ],
+  "product": {
+    "name": "Moment",
+    "url": "https://moment.szlezingier.com",
+    "tagline": "meditation inside the day, not beside it"
+  },
+  "hypotheses": {
+    "H1": "Meditation apps overwhelm people with content and choice.",
+    "H2": "The calm stays in the session: people are still reactive in real life."
+  },
+  "verdict": {
+    "H1": "held",
+    "H2": "held for the people it fails",
+    "pushback": "the interrupt is not new",
+    "unclaimed": "remembering your own intention at the moment it matters"
+  },
+  "counter_evidence": [
+    {
+      "kind": "competitor",
+      "name": "Mindfulness Bell",
+      "what": "Mindfulness Bell (App Store / Google Play) — interval or random bells throughout the day; #1 and #2 for 'mindfulness bell app random reminders'",
+      "link": "https://apps.apple.com/us/app/mindfulness-bell/id380816407"
+    },
+    {
+      "kind": "competitor",
+      "name": "Chill (Mindfulness Reminders)",
+      "what": "Chill – Mindfulness Reminders (App Store) — #2 for 'mindfulness reminder app throughout the day'",
+      "link": "https://apps.apple.com/au/app/chill-mindfulness-reminders/id986509491"
+    },
+    {
+      "kind": "competitor",
+      "name": "Plum Village bell",
+      "what": "Plum Village app — Bell of Mindfulness reminders",
+      "link": "https://plumvillage.app/how-and-why-to-use-the-mindfulness-bell-on-the-plum-village-app/"
+    },
+    {
+      "kind": "competitor",
+      "name": "One-Moment Meditation® (#1 and #2 for the minute)",
+      "what": "'one minute meditation reminder app': #1 One-Moment Meditation (App Store), #2 One-Moment Meditation® (Google Play), #3 Insight Timer — a registered mark; moment-serp.json and verdict-input.json agree",
+      "link": "https://apps.apple.com/us/app/one-moment-meditation/id873255555"
+    },
+    {
+      "kind": "counter",
+      "name": "r/Meditation: \"it has ALSO helped me to become LESS reactive\"",
+      "what": "r/Meditation: 'While meditation has enhanced my sensitivity to feelings, it has ALSO helped me to become LESS reactive emotionally.' — H2 is not universal",
+      "link": "https://www.reddit.com/r/Meditation/comments/ajc8v9/meditation_has_made_me_more_sensitive_once_you/"
+    }
   ]
 }
 </script>
@@ -694,6 +751,31 @@
       d.append(el('div', 'n', c.pct), el('div', 'label', c.label), el('div', 'of', c.of));
       clusters.append(d);
     });
+    // ---- Prove Me Wrong fields (optional; the authored copy stays when absent) ----
+    if (R.product && R.product.name) {
+      const eb = document.getElementById('heroEyebrow');
+      eb.textContent = 'prove me wrong · the verdict on ' + R.product.name;
+      eb.hidden = false;
+      document.getElementById('productName').textContent = R.product.name;
+      if (R.product.url) document.getElementById('productCta').href = R.product.url;
+    }
+    if (R.hypotheses && Object.keys(R.hypotheses).length) {
+      const dl = document.getElementById('hyps');
+      Object.entries(R.hypotheses).forEach(([k, v]) => dl.append(el('dt', null, k), el('dd', null, v)));
+      dl.hidden = false;
+    }
+    if (R.verdict && Array.isArray(R.counter_evidence) && R.counter_evidence.length) {
+      const g = document.getElementById('gap');
+      g.textContent = '';
+      g.append('the pushback · ', el('b', null, R.verdict.pushback || 'this already exists'), el('br'));
+      const link = (c) => { const a = el('a', null, c.name || c.what); if (c.link) { a.href = c.link; a.target = '_blank'; a.rel = 'noopener'; } return a; };
+      const competitors = R.counter_evidence.filter((c) => c.kind !== 'counter');
+      const counters = R.counter_evidence.filter((c) => c.kind === 'counter');
+      competitors.forEach((c, i) => g.append(link(c), i < competitors.length - 1 ? ' · ' : ''));
+      if (competitors.length) g.append(' — all exist.', el('br'));
+      counters.forEach((c) => g.append('and not everyone agrees: ', link(c), el('br')));
+      g.append('what no result offers: ', el('b', null, R.verdict.unclaimed || ''));
+    }
   } catch (e) { console.error('research-data render failed', e); }
 
   // ---------- scroll reveals ----------
