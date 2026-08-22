@@ -1,83 +1,79 @@
-# First Breath 🌬️
+# Moment — the web tried to break it first
 
-**A go-to-market story told by the web itself** — built for the Bright Data GTM event, Aug 22, 2026.
+**A go-to-market story told by the web itself.** Built for the Bright Data GTM event, Aug 22, 2026.
 
-First Breath is a pragmatic meditation product idea (start a timer, count your breaths, nothing else) and a demonstration of what GTM research looks like when you stop guessing: a research engine collects real market signal through **Bright Data**, **Claude** distills it into positioning evidence, and the result renders as a scroll-based storytelling landing page where every quote and percentage on screen is real, verbatim, and sourced.
+> Repo name note: this repository (and the published artifact) is still called **First Breath**, the project's original working title. The product, the page, the deck and the talk are all about **Moment**.
 
-**Live page:** https://claude.ai/code/artifact/9771a3f5-ac0a-4d4d-8101-293b0aa82f15
+**Live page:** https://claude.ai/code/artifact/9771a3f5-ac0a-4d4d-8101-293b0aa82f15 · **Product:** https://moment.szlezingier.com
+
+## The story, in eight beats
+
+1. **The pain.** Meditation apps sell calm and deliver a marketplace — ten thousand sessions, streaks, paywalls. And even when it works, the calm stays on the cushion: you sit for twenty minutes, feel present, then snap at your kid at 6pm, eat the second plate, scroll until 2am. The practice never reaches the moment where life actually happens.
+2. **The bet.** Two hypotheses — **H1:** apps overwhelm people with content and choice; **H2:** the calm stays in the session, people are still reactive in real life. The product that follows is **Moment**: one sentence about how you want to move through today, a pause every 30 minutes, one minute to breathe and choose again. Meditation *inside* the day, not beside it.
+3. **"Prove me wrong."** Before pitching it, Kew asked the web to break it. One Node engine wired to Bright Data, plus a coding agent that turned raw rows into a research object and injected it into a page. A third of the queries were written to *refute* the hypothesis.
+4. **The three calls.** Each Bright Data API used for what it's best at — **SERP API** (`brd_json=1`) for Google and for reddit via `site:`; **Web Scraper API** for structured Google Play reviews; **Web Unlocker** for reaching the Play page. Apple's reviews came from Apple's public feed, and the page says so.
+5. **What held.** H1: of 210 negative App Store reviews, 52% are paywall fatigue, 17% lost simplicity, 16% choice overload — and 300 Google Play reviews pulled through a second API land on the same shape. H2: held for the people it fails — *"when another same trigger arose, I was still reactive"* — and they prescribe the bridge themselves.
+6. **What pushed back.** Mindfulness Bell, MindBell, Chill and One-Moment Meditation® already exist; Insight Timer owns the SERP. The bell and the minute are taken. What no result offers: remembering *your own intention* at the moment it matters (r/selfimprovement: *"23 minutes later I'm in the thick of it"*).
+7. **The sharpened product.** Moment is not a reminder app and not a meditation library. It hands you back the sentence you chose this morning, in the middle of real life, with one minute to choose again.
+8. **The room does it.** The page ends in a working one-minute Moment: write one sentence, six breaths, the sentence returns mid-breath — *"Now choose again."*
+
+## How it works
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                                                                     │
-│   Bright Data ──▶  engine/collect.js  ──▶  corpus.json              │
-│    │                                                                │
-│    ├─ Apple review feed (public API; Unlocker is KYC-gated there)  │
-│    ├─ Web Unlocker → reddit threads (r/Meditation, r/getdisciplined)│
-│    └─ SERP API     → google results for beginner queries            │
-│                                                                     │
-│   corpus.json ──▶  engine/analyze.js (Claude)  ──▶  research.json   │
-│                     · clusters pain points (real %)                 │
-│                     · picks 4 verbatim quotes                       │
-│                     · names the search gap                          │
-│                                                                     │
-│   research.json ──▶  engine/run.js  ──▶  page/index.html            │
-│                       injected into <script id="research-data">     │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│  Bright Data ──▶  engine/src/{collect,question,play}.js  ──▶  engine/out/  │
+│    ├─ SERP API         google queries (12 written to break H1/H2) +        │
+│    │                   reddit threads via site:reddit.com/r/…              │
+│    ├─ Web Scraper API  Google Play reviews (Calm · Headspace · Waking Up)  │
+│    └─ Web Unlocker     the Play store page itself (Apple/reddit hosts are  │
+│                        KYC-gated — the collector records what served)      │
+│  Apple public feed ──▶ 450 App Store reviews (210 negative)                │
+│                                                                            │
+│  corpus ──▶ analysis (a coding agent, in-session) ──▶ out/research.json     │
+│              · verbatim quotes · computed clusters · verdict · pushback    │
+│                                                                            │
+│  research.json ──▶ engine/src/run.js --inject-only ──▶ page/index.html     │
+│                    (replaces <script id="research-data"> in place)         │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
-
-## Repo layout
 
 | Path | What it is |
 |---|---|
-| `page/index.html` | The scrollytelling landing page — one self-contained file, renders its research scene from an embedded JSON blob |
-| `engine/` | Node.js research pipeline: collect (Bright Data) → analyze (Claude) → inject (page) |
-| `SPEC.md` | Product + technical spec: story scenes, data contract, acceptance criteria |
-| `docs/ARCHITECTURE.md` | How everything works end to end, module by module |
+| `page/index.html` | The scrollytelling page — one self-contained file; scenes 5–6 render from the embedded `research-data` blob; the last scene is the one-minute Moment |
+| `engine/src/run.js` | Orchestrator: collect → analyze → inject (`--collect-only`, `--inject-only`) |
+| `engine/src/question.js` | The 12-query hypothesis sweep (gap / want / competition) → `out/moment-serp.json` |
+| `engine/src/play.js` | Google Play reviews through the Web Scraper API (Unlocker fallback) → `out/play-reviews.json` |
+| `engine/src/ask.js` | The live step: one SERP call, printed for a room |
+| `engine/out/research.json` | The research object currently on the page (quotes verbatim, clusters computed, verdicts, counter-evidence, method in `meta`) |
+| `docs/deck.js` → `docs/first-breath-how-it-works.pptx` | The talk deck, same eight beats |
+| `docs/TALK.md` | The five-minute talk with the live call inside it |
+| `SPEC.md` · `docs/ARCHITECTURE.md` | Data contract and end-to-end walkthrough |
 
 ## Quickstart
 
-**Prereqs:** Node ≥ 20 · a [Bright Data](https://brightdata.com/cp) account with a **Web Unlocker zone** and a **SERP API zone** · an Anthropic API key.
+**Prereqs:** Node ≥ 20 · a [Bright Data](https://brightdata.com/cp) account with a **SERP API zone**, a **Web Unlocker zone**, and access to the **Web Scraper API** (dataset `Google Play Store reviews`).
 
 ```bash
 cd engine
 npm install
-cp .env.example .env      # fill in: BRIGHTDATA_API_TOKEN, zone names, ANTHROPIC_API_KEY
+cp .env.example .env            # BRIGHTDATA_API_TOKEN + zone names (.env is auto-loaded by src/loadenv.js)
 
-# Full pipeline — collect, analyze, inject into ../page/index.html:
-node src/run.js          # .env is auto-loaded (src/loadenv.js) — no flag needed
+node src/run.js --collect-only  # reviews, reddit-via-SERP, 5 landscape queries → out/corpus.json
+node src/question.js            # 12 hypothesis queries → out/moment-serp.json
+node src/play.js                # Google Play reviews via Web Scraper API → out/play-reviews.json
+node src/ask.js "how to remember my intention for the day"   # the live step
 
-# Or test the Bright Data side alone (no Anthropic key needed):
-node src/run.js --collect-only
+node src/run.js --inject-only   # out/research.json → page/index.html
 ```
 
-Outputs land in `engine/out/`: `corpus.json` (raw collected signal) and `research.json` (the distilled result). The final step rewrites the `research-data` blob inside `page/index.html` in place. Open the page or republish it — the story now runs on real data. Once it does, delete the "illustrative placeholders" note in the page footer.
+Analysis: `run.js` will call the Anthropic API if `ANTHROPIC_API_KEY` has credits; otherwise it writes `out/analysis-prompt.md` and a coding agent (or you, in claude.ai) produces `out/research.json` from the corpus. That is how the current research object was made.
 
-## The demo (2½ minutes)
+## Integrity rules
 
-1. **The hook** (say it, don't slide it): *"I teach meditation by starting a timer and telling people to count their breaths. I always wondered if that's a product — so instead of guessing, I asked the web."*
-2. **The engine** — run `node src/run.js` on screen: watch it collect reviews, threads, and SERPs through Bright Data, then print Claude's GTM insights to the terminal.
-3. **The story** — scroll the landing page: noise → disconnection → instinct → the Bright Data fan-out → real quotes clustering into pain points → positioning.
-4. **The close** — the page's ten-breath timer. The room breathes together. *"That's the whole product — and this is what GTM looks like when the web shows you the way."*
+Every quote on the page is verbatim from `engine/out/corpus.json`, `moment-serp.json` or `play-reviews.json` (light `…` trimming only). Every percentage is computed from a corpus you can point to, with the method in `research.json.meta`. Every source is credited by the path that actually served it. These are the demo's claim on stage — see `AGENTS.md` for the full rules.
 
-**Live-agent variant:** the same research can run agentically through Bright Data's official MCP server (`npx @brightdata/mcp`, or hosted at `https://mcp.brightdata.com/mcp?token=…`), letting Claude drive `search_engine`, `scrape_as_markdown`, and structured `web_data_*` tools live on stage. Recommended flow: bake real data with the deterministic pipeline *before* the demo; show the agent as the "how it was made" moment. See `docs/ARCHITECTURE.md`.
+## Generalizing
 
-## Generalizing beyond meditation
+Nothing here is meditation-specific. Change the app IDs in `collect.js`/`play.js`, the query buckets in `question.js`, and the same loop — *two sentences of hypothesis, a third of the queries written to kill it, keep it honest* — produces an evidence-backed GTM story for any idea.
 
-Nothing in the pipeline is meditation-specific. Swap the app IDs, subreddits, and queries at the top of `engine/src/collect.js`, adjust the product framing in `engine/src/analyze.js`, and the same engine produces the same evidence-backed GTM story for any product idea. That's the pitch: **a repeatable playbook — idea in, sourced go-to-market narrative out.**
-
-## Notes & compliance
-
-- All web access flows through Bright Data's `/request` endpoint — two zones, one token, zero scraping infrastructure of your own.
-- A default run is ~9 Apple-feed fetches (Unlocker attempted first) + ~8 SERP queries — well inside a trial account.
-- Quotes are used verbatim for research/demo purposes; respect target-site ToS beyond the demo. Bright Data's compliance layer is part of the story.
-
-MIT licensed. Built with Bright Data SERP API · Apple's public review feed · Claude. (Web Unlocker and Web Scraper API paths are wired and ready once the account has KYC.)
-
-## The product
-
-The product is **[Moment](https://moment.szlezingier.com)** — one intention, a pause every thirty minutes, one minute to choose again. This repo is the go-to-market research that tried to break Moment's hypothesis with real web data, and the page that tells that story. ("First Breath" is the repo's original name.)
-
-## Talk deck
-
-`docs/first-breath-how-it-works.pptx` — ten slides for a Bright Data audience: the idea → the three APIs → two patterns (refuting queries + `site:` via SERP; fallbacks + honest attribution) → what held → what was refuted → live call → output → recipe. Script in `docs/TALK.md`; live helper `node engine/src/ask.js "<query>"`. Regenerate with `node docs/deck.js` (needs `pptxgenjs`). Every quote and number on it is the same `research.json`/corpus as the page.
+MIT licensed. Built with Bright Data SERP API · Web Scraper API · Web Unlocker · Apple's public review feed · Claude.

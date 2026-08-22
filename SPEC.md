@@ -1,86 +1,81 @@
-# First Breath — Specification
+# Moment — Specification
 
-Version 1.0 · Bright Data GTM event, Aug 22, 2026
+Version 2.0 · Bright Data GTM event, Aug 22, 2026
 
 ## 1. Problem statement
 
-People who want to start meditating face two compounding problems: **disconnection** (rising anxiety, shrinking attention) and **choice overload** (hundreds of apps, each with hundreds of sessions, subscriptions, and gamified streaks). Most beginners don't fail at meditating — they fail at choosing how to start.
+Meditation apps sell calm and deliver a marketplace: ten thousand sessions, streaks, paywalls. Worse — even when the app works, the calm stays on the cushion. You sit for twenty minutes, feel present, then snap at your kid at 6pm, eat the second plate, scroll until 2am. The practice never reaches the moment where life actually happens.
 
-**The product hypothesis:** a radically pragmatic entry point — start a timer, count your breaths, nothing else.
+**The hypothesis.** H1: apps overwhelm people with content and choice. H2: the calm stays in the session; people are still reactive in real life.
 
-**The GTM question this project answers:** is that hypothesis what the market actually wants, and how would you position, phrase, and channel it? Instead of guessing, the system mines the web for evidence.
+**The bet.** [Moment](https://moment.szlezingier.com): one sentence about how you want to move through today, a pause every 30 minutes, one minute to breathe and choose again. Meditation inside the day, not beside it.
+
+**The GTM question this repo answers:** can the web break that hypothesis before anyone pitches it? Instead of searching for agreement, the engine runs queries written to refute it, and reports what held and what pushed back.
 
 ## 2. What gets built
 
-Two components in one repo:
-
-1. **The engine** (`engine/`) — a Node.js pipeline that collects market signal via Bright Data, distills it with Claude, and emits a structured research result.
-2. **The page** (`page/index.html`) — a scroll-based storytelling landing page that renders that result as a founder-story narrative, ending in an interactive breath timer. The page is simultaneously the *demo* and the *GTM deliverable* (a launch asset built from the research).
+1. **The engine** (`engine/`) — a Node.js pipeline that collects market signal through Bright Data, distills it into a research object (a coding agent does the analysis from the corpus), and injects it into the page.
+2. **The page** (`page/index.html`) — a scroll-based storytelling page that renders the research object and ends in a working one-minute Moment. The page is the demo, the deliverable and the pitch.
+3. **The deck and talk** (`docs/`) — the same eight beats for a Bright Data audience, with one live API call inside.
 
 ## 3. The story (page spec)
 
-Eight full-viewport scroll scenes. Single-theme dark design (ground `#0C0A08`, ink `#EDE4D7`); two accent colors carry the narrative voices — **ember `#D9954A`** for the human/breath thread, **web-blue `#6E9BD1`** for the data/agent thread. Type: Fraunces (human voice), Karla (body), IBM Plex Mono (machine voice — API labels, counts).
+Eight full-viewport scenes in the fixed arc. Single-theme dark design (ground `#0C0A08`, ink `#EDE4D7`); two accents carry the two voices — **ember `#D9954A`** for the human thread (Fraunces), **web-blue `#6E9BD1`** for the data thread (IBM Plex Mono for API labels and counts); Karla for body.
 
-| # | Scene | Beat | Mechanic |
+| # | Beat | Scene | Mechanic |
 |---|---|---|---|
-| 1 | Hero | "First Breath" | slow-pulsing amber orb (9s idle-breath loop) |
-| 2 | The noise | you opened the app store | ~20 drifting clutter chips fade in around a clear copy corridor |
-| 3 | Disconnection | more tools for calm, more disconnected | near-black, one lone dot |
-| 4 | The instinct | timer + counted breaths, then founder doubt | amber timer ring; doubt line sets up the research |
-| 5 | Asking the web | Bright Data fan-out | 3 source cards **rendered from data**: API name (mono, blue), volume, origin |
-| 6 | The reveal | strangers agree; pain points cluster | quotes then clusters **rendered from data**; blue quotes resolve into amber percentages |
-| 7 | The way | data gave permission, not a product | positioning statement |
-| 8 | Breathe | try it now | working timer: 10 breaths, 4s in / 6s out; ends "That's the whole product." |
-| — | Coda | GTM thesis + credits | "Built with Bright Data · Web Scraper API · Crawl API · SERP API" |
+| 1 | pain | Hero — "Moment" | slow-pulsing amber orb; subline names the pain in one breath |
+| 2 | pain | The noise — you opened the app store | ~20 drifting clutter chips around a clear copy corridor |
+| 3 | pain | Calm for twenty minutes. Then the day happens. | near-black, one lone dot |
+| 4 | the bet | Two things are broken → Moment, the hypothesis | amber ring reads `01:00`; "before telling anyone, I tried to break it" |
+| 5 | prove me wrong | I asked the web to prove me wrong | 3 source cards **rendered from data**: API (mono, blue) · volume · origin |
+| 6 | what held / what pushed back | Half of it held. Half of it pushed back. | quotes then clusters **rendered from data**; the pushback line (`.gap`) and the verdict stay on one 1080p screen with the clusters |
+| 7 | the sharpened product | The data didn't confirm my product. It sharpened it. | positioning statement |
+| 8 | the room does it | Try one moment | intention input → `Enter` starts → 6 breaths (4 s in / 6 s out) → the intention returns mid-minute → "Now choose again." → CTA to moment.szlezingier.com; `Escape` aborts |
+| — | coda | credits | "Built with Bright Data SERP API · Web Scraper API · Web Unlocker · Apple's public review feed · Claude" |
 
-Page requirements: one self-contained HTML file (Google Fonts is the only external host), keyboard-focusable CTA, `prefers-reduced-motion` respected, no horizontal scroll, works as a Claude Artifact (no doctype/head/body of its own).
+Page requirements: one self-contained HTML file (Google Fonts is the only external host), no doctype/html/head/body tags of its own (the artifact publish path adds the skeleton), keyboard-focusable CTA, `prefers-reduced-motion` respected, no horizontal scroll, zero console errors at 1920×1080 and 390×844.
 
 ## 4. Data contract (engine → page)
 
-The page renders scenes 5–6 from a single embedded blob: `<script id="research-data" type="application/json">`. The engine's only integration point is replacing that blob's contents. Shape:
+The page renders scenes 5–6 from one embedded blob: `<script id="research-data" type="application/json">`. The engine's only integration point is replacing that blob's contents (`run.js --inject-only`). Shape:
 
 ```json
 {
-  "sources": [
-    { "api": "Web Scraper API", "what": "12,438 app-store reviews, structured", "from": "calm · headspace · waking up" }
-  ],
-  "quotes": [
-    { "text": "verbatim quote, lightly trimmed, never invented", "src": "app-store review · via web scraper api" }
-  ],
-  "clusters": [
-    { "pct": "31%", "label": "Too much woo", "of": "of negative signal" }
-  ]
+  "sources":  [ { "api": "SERP API", "what": "104 search results from 12 questions …", "from": "…" } ],
+  "quotes":   [ { "text": "verbatim, lightly trimmed with …, never invented", "src": "r/meditation · via bright data serp" } ],
+  "clusters": [ { "pct": "52%", "label": "Paywall fatigue", "of": "of negative reviews" } ]
 }
 ```
 
-Rules: exactly 3 `sources` (one per API) and 3 `clusters`; 3–5 `quotes`; `pct` computed from observed negative signal, whole numbers, need not sum to 100; `quotes[].text` must be verbatim from the corpus (trimming with `…` allowed, invention forbidden). The blob ships with clearly-labeled placeholder values so the page degrades gracefully before the first real run.
+Rules: exactly 3 `sources` and 3 `clusters`; 3–5 `quotes`. `quotes[].text` must be verbatim from `engine/out/corpus.json`, `moment-serp.json` or `play-reviews.json`. `pct` is computed by `engine/src/clusters.js` (whole numbers; classes are non-exclusive, so shares need not sum to 100). `engine/src/verify.js` enforces all of this and the byte-identity of the blob with `research.json`. The full `research.json` additionally carries `hypothesis.verdict`, `counter_evidence`, `insights` and `meta` (corpus sizes, method, attribution) — those feed the deck and talk, not the page.
 
 ## 5. Collection spec (engine)
 
-All collection goes through Bright Data (`POST https://api.brightdata.com/request`, Bearer auth):
+Three Bright Data APIs, each for what it is best at, plus one public feed. All Bright Data traffic is Bearer-authenticated against `api.brightdata.com`.
 
-| Fan-out | Zone | Targets | Yield |
+| Source | API / path | Script | Yield (verified) |
 |---|---|---|---|
-| App-store reviews | Web Unlocker → **direct fetch** (Apple hosts are KYC-gated on the Unlocker; every verified run served 0 pages via unlocker, 9 via direct — credited on the page as "App Store review feed · public API") | Apple customer-review feeds: Calm `571800810`, Headspace `493145008`, Waking Up `1307736395` (3 pages each) | rating, title, text per review |
-| Community threads | Web Unlocker | `reddit.com/r/{Meditation,getdisciplined}/search.json`, 3 curated queries about starting/quitting/frustration | title, selftext, score, permalink |
-| Search landscape | SERP API (`brd_json=1`) | 5 beginner queries ("how to start meditating", "…without an app", …) | top-8 organic per query + related searches |
+| Google search landscape + hypothesis sweep | **SERP API** (`/request`, SERP zone, `brd_json=1`) | `collect.js` (5 queries) · `question.js` (12 queries bucketed gap / want / competition) | 42 + 104 rows |
+| reddit threads | **SERP API** via `site:reddit.com/r/…` (reddit.com is KYC-gated on the Unlocker; the collector tries the Unlocker first and records the fallback) | `collect.js` | 30 threads |
+| Google Play reviews | **Web Scraper API** (`/datasets/v3/trigger` → `progress` → `snapshot`, dataset `gd_m6zagkt024uwvvwuyu` "Google Play Store reviews") | `play.js` | 300 reviews (100 × Calm, Headspace, Waking Up), 153 negative at ≤ 3 |
+| Google Play store pages | **Web Unlocker** (`/request`, Unlocker zone) — proves the Unlocker reaches Play; `play.js --unlocker` is the fallback path | `play.js --unlocker` | 3/3 pages, 200 OK, ~1.2 MB each |
+| App Store reviews | Apple's public customer-review feed, direct fetch (Apple hosts are policy-gated on the Unlocker without KYC — `pathStats` records 0 via unlocker, 9 direct) | `collect.js` | 450 reviews, 210 negative |
 
-Upgrade path (optional): the structured Web Scraper API (`datasets/v3/trigger` → `progress/{id}` → `snapshot/{id}`) for Google Play / App Store scrapers from the scraper library; helpers are already in `engine/src/brightdata.js`.
-
-Collector behavior: individual fetch failures warn and continue (a partial corpus is acceptable); raw corpus is always persisted to `engine/out/corpus.json` before analysis.
+Collector behavior: individual failures warn and continue; every source records the path that served it; raw corpora are always persisted to `engine/out/` before analysis. `engine/out/` is gitignored and irreplaceable on the machine that ran it — never delete it.
 
 ## 6. Analysis spec
 
-One Claude call (`ANTHROPIC_MODEL`, default `claude-sonnet-4-5`). Input: negative reviews (rating ≤ 3, capped 120), threads (capped 60), SERP rows (capped 60), plus true totals. Output: the §4 contract plus `insights` — 3–5 one-line GTM findings (positioning, customer language, SERP gaps) printed to the terminal for the talk track. The prompt forbids invented quotes and requires computed percentages. Response is parsed by extracting the outermost JSON object; a malformed response fails loudly rather than injecting garbage.
+`run.js` calls the Anthropic Messages API when `ANTHROPIC_API_KEY` has credits; otherwise it writes `out/analysis-prompt.md` and a coding agent (Claude in-session) produces `out/research.json` from the corpus. The current research object was made that way. Either path obeys the same rules: quotes verbatim, clusters from `clusters.js`, counter-evidence recorded, method in `meta`. `insights` are the one-liners the talk quotes.
 
 ## 7. Acceptance criteria
 
-1. `node --env-file=.env src/run.js --collect-only` completes against live Bright Data zones and writes a corpus with ≥ 50 reviews, ≥ 20 threads, ≥ 20 SERP rows.
-2. Full run writes `research.json` matching §4 and injects it; the page then shows real counts, quotes, and percentages with correct source attributions.
-3. Page scrolls cleanly on a projector (1080p) and a phone; breath timer runs 10 cycles and lands the closing line.
-4. Placeholder footer note is removed once real data is in.
-5. A stranger can go from `git clone` to a full run using only README instructions.
+1. `node src/run.js --collect-only`, `node src/question.js` and `node src/play.js` complete against live Bright Data zones and write their corpora.
+2. `node src/verify.js` is green: every quote verbatim, clusters equal to `clusters.js`, page blob byte-identical to `research.json`, card counts equal to corpora.
+3. The page scrolls cleanly at 1920×1080 and 390×844 with zero console errors; one Moment runs to completion headlessly; after completion the CTA is above the fold at 1080p.
+4. The deck (≤ 10 slides) and the talk (≤ 5:00 with the live call) follow the eight beats in order; every number and quote in them exists in `research.json`, `moment-serp.json` or `play-reviews.json`.
+5. A stranger can go from `git clone` to a full run using only `README.md`.
 
 ## 8. Out of scope (v1)
 
-The meditation app itself (the page's timer *is* the MVP gesture), accounts/payments, scheduled re-runs, multi-product configuration UI (generalization is by editing `collect.js` constants), and automated republishing of the artifact.
+The Moment app itself (the page's last scene is the gesture; the product lives at moment.szlezingier.com), accounts/payments, scheduled re-runs, multi-product configuration UI (generalization is by editing the constants in `collect.js`, `question.js`, `play.js`), and automated republishing of the artifact.

@@ -78,19 +78,25 @@ export async function triggerDataset(datasetId, inputs, params = {}) {
   return snapshot_id;
 }
 
-export async function waitForSnapshot(snapshotId, { pollMs = 5000, timeoutMs = 600000 } = {}) {
+export async function waitForSnapshot(snapshotId, { pollMs = 5000, timeoutMs = 600000, onProgress } = {}) {
   const started = Date.now();
   for (;;) {
-    const prog = await fetch(`${BASE}/datasets/v3/progress/${snapshotId}`, { headers: authHeaders() })
-      .then((r) => r.json());
+    let prog;
+    try {
+      prog = await fetch(`${BASE}/datasets/v3/progress/${snapshotId}`, { headers: authHeaders() })
+        .then((r) => r.json());
+    } catch (err) {
+      prog = { status: 'network-error', error: err.cause?.code ?? err.message }; // transient: keep polling
+    }
+    onProgress?.(prog, Date.now() - started);
     if (prog.status === 'ready') break;
     if (prog.status === 'failed') throw new Error(`snapshot ${snapshotId} failed`);
-    if (Date.now() - started > timeoutMs) throw new Error(`snapshot ${snapshotId} timed out`);
+    if (Date.now() - started > timeoutMs) throw new Error(`snapshot ${snapshotId} timed out (last status: ${prog.status})`);
     await new Promise((r) => setTimeout(r, pollMs));
   }
   const res = await fetch(`${BASE}/datasets/v3/snapshot/${snapshotId}?format=json`, {
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error(`snapshot download ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`snapshot download ${res.status}: ${snip(await res.text())}`);
   return res.json();
 }

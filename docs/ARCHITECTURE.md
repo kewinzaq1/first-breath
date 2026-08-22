@@ -1,14 +1,16 @@
-# How First Breath works
+# How it works
 
-End-to-end walkthrough of the system: what runs, in what order, and why each piece is shaped the way it is.
+End-to-end walkthrough of the Moment research engine: what runs, in what order, and why each piece is shaped the way it is.
 
 ## The one-sentence version
 
-A Node.js pipeline fetches raw market signal through Bright Data's proxy/unblocking network, a single Claude call turns that corpus into a small structured research object, and a self-contained landing page renders that object as a scroll-driven founder story.
+A Node.js pipeline fetches raw market signal through three Bright Data APIs (each used for what it is best at) plus Apple's public review feed; a coding agent turns that corpus into a small research object whose numbers are computed by code and whose quotes are verbatim; and a self-contained landing page renders that object as the story *pain → the bet → prove me wrong → the three calls → what held → what pushed back → the sharpened product → the room does it*.
 
-## Stage 0 — access (engine/src/brightdata.js)
+## Stage 0 — access (`engine/src/brightdata.js`)
 
-Everything network-shaped goes through one Bright Data endpoint:
+One Bearer token, two endpoints, ~100 lines over `fetch`, no SDK — so the integration stays legible on a projector.
+
+**`/request`** — synchronous, the zone decides the behavior:
 
 ```
 POST https://api.brightdata.com/request
@@ -16,37 +18,40 @@ Authorization: Bearer $BRIGHTDATA_API_TOKEN
 { "zone": "<zone name>", "url": "<target url>", "format": "raw" }
 ```
 
-The `zone` decides the behavior:
+- **SERP zone** (`serp()`) — the URL is a Google search with `brd_json=1` appended; Bright Data returns the SERP already parsed (`organic[]` with rank/title/link/description, `people_also_ask[]`, `related[]`). About 1.8 s a query, zero HTML anywhere in the pipeline.
+- **Web Unlocker zone** (`unlock()` / `unlockJson()`) — any URL, blocks and fingerprints handled, the page body comes back. Its errors are **plain text**, not JSON (`destination_ip_prohibited`, `Residential Failed (bad_endpoint) …`) — `brightdata.js` always surfaces a body snippet and never `JSON.parse`s blindly.
 
-- **Web Unlocker zone** (`unlock()` / `unlockJson()`) — Bright Data handles IP rotation, browser fingerprints, and CAPTCHAs; you get the target page's body back. We use it for endpoints that return JSON directly, so there is no HTML parsing anywhere in the pipeline.
-- **SERP zone** (`serp()`) — the target URL is a Google search; appending `brd_json=1` makes Bright Data return the SERP already parsed (organic results, related searches) as JSON.
+**`/datasets/v3`** — asynchronous, the **Web Scraper API** (`triggerDataset()` / `waitForSnapshot()`):
 
-The module also implements the **Web Scraper API** async flow for the structured scraper library: `triggerDataset()` posts inputs to `datasets/v3/trigger?dataset_id=…` and returns a `snapshot_id`; `waitForSnapshot()` polls `datasets/v3/progress/{id}` until `ready`, then downloads `datasets/v3/snapshot/{id}?format=json`. The demo doesn't need it (see below), but it's the production path for e.g. Google Play reviews at scale.
+```
+POST /datasets/v3/trigger?dataset_id=gd_m6zagkt024uwvvwuyu&limit_per_input=100   [{url}, {url}, {url}]  → { snapshot_id }
+GET  /datasets/v3/progress/{snapshot_id}                                           → { status: running | ready, records }
+GET  /datasets/v3/snapshot/{snapshot_id}?format=json                               → [ { review_rating, review, reviewer_name, … } ]
+```
 
-Design choice: no SDK, no scraping framework — the whole client is ~90 lines over `fetch`, which keeps the Bright Data integration legible on a projector.
+The dataset id comes from `GET /datasets/list` (1,743 datasets; "Google Play Store reviews" is `gd_m6zagkt024uwvvwuyu`). The poller tolerates transient network errors and re-reads a snapshot that reports `ready` before its rows are flushed.
 
-## Stage 1 — collect (engine/src/collect.js)
+## Stage 1 — collect
 
-Three fan-outs, matching the three source cards in the page's "asking the web" scene:
+Three scripts, one corpus each, all in `engine/out/` (gitignored; the corpora only exist where a run happened — never delete them).
 
-1. **App-store reviews** — Apple publishes a customer-review feed per app (`itunes.apple.com/…/rss/customerreviews/…/json`). We fetch 3 pages × 3 apps (Calm, Headspace, Waking Up) and keep rating, title, and text. The collector tries Web Unlocker first, but `itunes.apple.com` and `apps.apple.com` are policy-gated without KYC (`destination_ip_prohibited`, verified on the 2026-08-21 and 2026-08-22 runs: 0 pages via unlocker, 9 via direct), so in practice the public feed is fetched directly. The page therefore credits this source as "App Store review feed · public API" — not Bright Data. (Google Play *does* resolve through the Unlocker; a Play-reviews collector or the `triggerDataset()` Web Scraper path is the honest upgrade if Bright Data-sourced reviews matter.)
-2. **Reddit threads** — Reddit exposes `search.json` per subreddit. Three curated queries target the moments people start, struggle with, and quit meditation (r/Meditation, r/getdisciplined). Fetched through Web Unlocker because Reddit rate-limits and blocks datacenter traffic aggressively.
-3. **SERP landscape** — five beginner-intent queries through the SERP zone. This answers the channel question: who owns the results a beginner sees, and which queries have no pragmatic answer ranking (the content gap First Breath could take).
+1. **`collect.js`** → `out/corpus.json` — three fan-outs with fallbacks and honest attribution:
+   - *App Store reviews*: Apple's public feed (`itunes.apple.com/…/rss/customerreviews/…/json`), 3 pages × 3 apps (Calm, Headspace, Waking Up) → 450 reviews, 210 negative (rating ≤ 3). The collector tries the Web Unlocker first; Apple hosts are policy-gated without KYC, so `pathStats` records `0 via unlocker, 9 via direct` and the page credits "App Store feed · public API".
+   - *reddit threads*: the Unlocker path (`reddit.com/r/…/search.json`) is KYC-gated; the fallback asks Google for `site:reddit.com/r/Meditation …` through the SERP zone → 30 threads (titles + snippets — all a hypothesis test needs).
+   - *Landscape*: five beginner-intent queries through the SERP zone → 42 rows.
+2. **`question.js`** → `out/moment-serp.json` — the hypothesis sweep. Twelve queries bucketed **gap** (does the calm carry over?), **want** (what do people ask for instead?), **competition** (does this already exist? — written to hurt). 104 rows in ~25 s. This is where the pushback came from.
+3. **`play.js`** → `out/play-reviews.json` — Google Play reviews through the Web Scraper API: 300 structured rows (100 per app) in 179 s, `via: "web-scraper-api"`, dataset and snapshot ids recorded. `play.js --unlocker` is the fallback: the three Play pages through the Web Unlocker (3/3 · 200 OK · ~1.2 MB each, verified Aug 22) — it proves the Unlocker reaches Play, but the structured rows are the Scraper API's job.
 
-Failures warn and continue — a partial corpus still tells the story. Everything raw lands in `engine/out/corpus.json` so collection and analysis can be iterated independently.
+Every output file says which path served it. At a data event, that honesty is the product.
 
-## Stage 2 — analyze (engine/src/analyze.js)
+## Stage 2 — analyze
 
-One Claude Messages API call. The prompt:
+`run.js` calls the Anthropic API if `ANTHROPIC_API_KEY` has credits; otherwise it writes `out/analysis-prompt.md` and a coding agent produces `out/research.json` in-session from the corpus (that is how the current one was made). Two pieces of code keep the agent honest:
 
-- frames the product hypothesis (pragmatic simplicity) so insights are decision-relevant, not generic;
-- passes negative reviews (rating ≤ 3), threads, and SERP rows, capped to keep the context lean;
-- demands the page's exact data contract back (see `SPEC.md` §4), with two hard rules: **quotes must be verbatim** from the corpus, and **cluster percentages must be computed** from the negative signal actually present;
-- additionally returns `insights` — one-liners for the talk track, printed to the terminal during the demo.
+- **`clusters.js`** — the cluster method *is* this file: negative = rating ≤ 3; three classes, one case-insensitive regex each over title + text, non-exclusive. `node src/clusters.js` prints the shares for both review corpora. Result on the 210 App Store negatives: **52% paywall fatigue · 17% lost simplicity · 16% choice overload**; the 153 Google Play negatives, classified with the identical regexes, land on **54 · 11 · 14** — a cross-check, not blended into the page numbers.
+- **`verify.js`** — every `quotes[].text` fragment (split on `…`) must be a verbatim substring of a corpus row; every `clusters[].pct` must equal what `clusters.js` computes; the page blob must be byte-identical to `research.json`; the source-card counts must equal the corpora. Exit 1 on any failure. Run it before every republish.
 
-The response is parsed by slicing the outermost `{…}` — tolerant of stray prose, but a malformed result throws rather than injecting bad data into the page.
-
-## Stage 3 — inject (engine/src/run.js)
+## Stage 3 — inject (`run.js --inject-only`)
 
 The page holds its research data in one embedded blob:
 
@@ -54,32 +59,32 @@ The page holds its research data in one embedded blob:
 <script id="research-data" type="application/json"> { sources, quotes, clusters } </script>
 ```
 
-`run.js` regex-replaces the blob's contents inside `page/index.html` in place. That's the entire integration surface between engine and page — no server, no build step, no fetch at view time. The page stays a single self-contained file, which is what lets it be published as a Claude Artifact (or hosted anywhere) with zero infrastructure.
+`run.js` regex-replaces the blob's contents in `page/index.html` in place. That's the entire integration surface — no server, no build step, no fetch at view time — which is what lets the page be one self-contained file published as a Claude Artifact.
 
-## The page (page/index.html)
+## The page (`page/index.html`)
 
-- **Rendering:** on load, a small script parses the blob and builds the source cards, quote list, and cluster tiles *before* the IntersectionObserver-driven reveal animations register, so injected content animates identically to authored content. If parsing fails, the page logs and shows the rest of the story.
-- **Storytelling mechanics:** scroll reveals via one IntersectionObserver; the "noise" scene generates its drifting clutter chips in JS with randomized positions/rotations, keeping a clear corridor for copy; the finale is a real breath timer (10 cycles, 4s in / 6s out) driven by timeouts + CSS scale transitions on the orb.
-- **Design system:** deliberately single-theme dark (the calm is the aesthetic). Two accents encode the two narrative voices — ember for the human thread, web-blue for the data thread — and the reveal scene is where blue evidence resolves into amber conclusions. Mono type marks every place the machine is speaking (API labels, counts, quote attributions).
-- **Accessibility:** `prefers-reduced-motion` disables drift/pulse and swaps reveals to opacity-only; the timer degrades to text cues; the CTA has a visible focus state.
+- **Rendering:** on load, a small script parses the blob and builds the source cards, quotes and cluster tiles *before* the IntersectionObserver reveal animations register, so injected content animates identically to authored content. If parsing fails, the page logs and shows the rest of the story.
+- **Storytelling mechanics:** one IntersectionObserver for reveals; the "noise" scene generates drifting clutter chips in JS with a clear corridor for copy (staggered top/bottom bands on phones); the reveal scene resolves blue evidence into amber conclusions and keeps the pushback line on the same 1080p screen as the clusters.
+- **The last scene is a real Moment:** one sentence (placeholder is a real one), `Enter` starts, six breaths at 4 s in / 6 s out, the sentence returns mid-minute, "Now choose again.", then the CTA to moment.szlezingier.com above the fold; `Escape` aborts; "Again · with a new sentence" re-runs.
+- **Design system:** single-theme dark; ember = the human voice (Fraunces), web-blue = the machine voice (IBM Plex Mono for API labels, counts, attributions). Nothing neutral, nothing decorative.
+- **Accessibility:** `prefers-reduced-motion` disables drift/pulse and swaps reveals to opacity-only; the Moment degrades to text cues; the CTA has a visible focus state.
+
+## The stage (`engine/src/ask.js`)
+
+`node src/ask.js "<query from the room>"` — one SERP call, printed for a room: the request shape, the ms count, the top results, people-also-ask and related searches. ~1.8 s. If the venue network dies, deck slide 8 *is* the output.
 
 ## The live-agent variant (Bright Data MCP)
 
-The deterministic pipeline exists so the demo cannot fail on stage. The same research also runs agentically: Bright Data's official MCP server exposes `search_engine`, `scrape_as_markdown`, and ~60 structured `web_data_*` tools (Apple App Store, Google Play, Reddit posts, …) to any MCP client.
-
-```bash
-claude mcp add brightdata -e API_TOKEN=<token> -- npx -y @brightdata/mcp
-# hosted alternative: https://mcp.brightdata.com/mcp?token=<token>
-```
-
-Stage flow that uses both: bake real data with the pipeline beforehand → demo the page → then show Claude + MCP re-deriving one insight live ("find me three more verbatim complaints about meditation apps being overwhelming") as the "how it was made" moment.
+The same research runs agentically: Bright Data's MCP server exposes `search_engine`, `scrape_as_markdown` and structured `web_data_*` tools to any MCP client. `claude mcp add brightdata -e API_TOKEN=<token> -- npx -y @brightdata/mcp`. Bake real data with the pipeline first; show the agent as the "how it was made" moment only if it rehearses cleanly.
 
 ## Failure modes & what to do
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `Bright Data /request 4xx` | wrong zone name or token | zone names in `.env` must match the control panel exactly |
-| Empty review set | app ID wrong/region-locked | verify the ID in the app's App Store URL; try another `page=` |
-| Reddit returns HTML | endpoint blocked without unlocker, or old path | confirm the URL ends in `.json` and goes through `unlock()` |
-| `No JSON in analysis response` | model returned prose | rerun; keep `max_tokens` ≥ 3000; check corpus isn't empty |
-| Page shows placeholders after run | injection target missing | run from `engine/`; page must contain the `research-data` block |
+| Unlocker returns `destination_ip_prohibited` / `Residential Failed (bad_endpoint)` | host is KYC-gated on the zone | the collector already falls back (direct feed / SERP `site:`); complete KYC to open the direct path |
+| `trigger 4xx` on the Web Scraper API | wrong `dataset_id` or input shape | `GET /datasets/list` → find "Google Play Store reviews"; inputs are `[{url}]` |
+| snapshot `ready` but 0 rows | rows not flushed yet | `node src/play.js --snapshot <id>` re-downloads |
+| `verify.js` fails on a quote | quote edited or paraphrased | restore the verbatim text from the corpus; only `…` trimming is allowed |
+| `verify.js` fails on a cluster | regex changed or research.json stale | rerun `node src/clusters.js`, update `research.json`, `--inject-only`, republish |
+| Page shows old numbers after inject | artifact not republished, or old version pinned | republish to the **same** artifact URL and unpin the old version in the artifact UI |
