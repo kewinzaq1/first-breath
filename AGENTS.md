@@ -15,6 +15,10 @@ A go-to-market story told by the web itself. Kew teaches pragmatic meditation ("
 - ✅ **Projector pass done (Aug 22).** `@media (min-width:1500px)` scales the type system to 21px root; noise chips keep a clean corridor on wide screens and sit in staggered top/bottom bands on phones; SERP-gap insight rendered as a data-voice line above the verdict; breath timer can be re-run (`Again · ten breaths`) and `Escape` aborts a running session.
 - ✅ `.env` auto-loading (`engine/src/loadenv.js`), resilient collectors with fallbacks, `--collect-only` and `--inject-only` modes, offline analysis path.
 
+## Demo-day plan
+
+`docs/DEMO-BRIEF.md` is the step-by-step plan for the morning of Aug 22 (consolidate → third API via Web Scraper → page → deck → talk → stage kit), with completion bars and fallbacks. Follow it before anything below.
+
 ## The story (the one argument everything serves)
 
 **The product is Moment** (https://moment.szlezingier.com): one intention, a pause every 30 minutes, one minute to choose again — meditation *inside* the day. "First Breath" is the repo's legacy name; the page and deck are about Moment now.
