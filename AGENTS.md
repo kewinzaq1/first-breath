@@ -1,4 +1,6 @@
-# AGENTS.md — coding-agent briefing for First Breath
+# AGENTS.md — coding-agent briefing for First Breath / Prove Me Wrong
+
+> **Two briefs exist in git history.** `docs/DEMO-BRIEF.md` as of commit `4ab2821` told the Moment story; Kew rewrote it at `1e8e9d8` (Aug 22, 04:23 UTC): **the product is Prove Me Wrong** (a Bright Data hypothesis-breaker), Moment is the worked example. Both were built on Aug 22 — the Moment demo is complete and intact, and the Prove Me Wrong layer (`hypothesis.json`, `provemewrong.js`, the extended page blob, the reframed deck/talk) sits on top of it. The current `docs/DEMO-BRIEF.md` is the authoritative plan.
 
 You are stepping into a **live hackathon project the night before the event** (Bright Data GTM event, Aug 22, 2026, owner: Kew). Read this whole file before touching anything. The demo works *right now* — your job is to improve it without breaking a working thing.
 
@@ -23,7 +25,7 @@ A go-to-market story told by the web itself. Kew teaches pragmatic meditation ("
 
 ## The story (the one argument everything serves)
 
-**The product is Moment** (https://moment.szlezingier.com): one intention, a pause every 30 minutes, one minute to choose again — meditation *inside* the day. "First Breath" is the repo's legacy name; the page and deck are about Moment now.
+**The product is Prove Me Wrong**: give it two sentences of hypothesis, a community and your competitors (`engine/hypothesis.json`); `engine/src/provemewrong.js` asks the web to break it through three Bright Data APIs and returns `out/verdict-input.json`; a coding agent writes `research.json`; the page renders the verdict. **The worked example is Moment** (https://moment.szlezingier.com): one intention, a pause every 30 minutes, one minute to choose again. "First Breath" is the repo's legacy name.
 
 **Hypothesis → tried to break it → what held → what pushed back → the fix → how.** Kew's two-part hypothesis: (H1) meditation apps overwhelm people with content/choice; (H2) the calm stays in the session — people are still reactive in real life. The research exists to *question* that, not confirm it: `engine/src/question.js` runs 12 SERP queries, four of them written to refute (does practice carry over? do bells/one-minute apps already exist?). Result: H1 holds (52% paywall fatigue, 17% lost simplicity, 16% choice overload — computed by `clusters.js`; Google Play agrees); H2 holds for the people it fails, who prescribe the bridge themselves; **pushback**: Mindfulness Bell, MindBell, Chill, One-Moment Meditation® (a registered mark!) all exist; One-Moment Meditation® holds #1–#2 for 'one minute meditation reminder app' (Insight Timer is #3 — the old 'owns the SERP' line was wrong) — so Moment cannot be "a reminder app". What no result offers: remembering *your own intention* at the moment it matters (r/selfimprovement). The page, the deck (`docs/first-breath-how-it-works.pptx` ← `docs/deck.js`) and `engine/out/research.json` all follow this order; keep it when editing any of them. `engine/out/research.first-breath.json` is the previous (timer-product) research, kept for reference.
 
@@ -47,7 +49,9 @@ engine/src/collect.js    3 fan-outs + fallbacks (see "hard-won lessons"). pathSt
 engine/src/analyze.js    buildPrompt() / parseAnalysis() / analyze() (Anthropic SDK).
 engine/src/run.js        Orchestrator. Flags: --collect-only, --inject-only.
 engine/src/question.js   Hypothesis sweep for Moment: 12 SERP queries (incl. refuting ones) → out/moment-serp.json.
-engine/src/ask.js        Stage helper: one SERP call, printed for a room. `node src/ask.js "<query>"`; `--cached` = offline fallback.
+engine/hypothesis.json   The product's input (Moment example): product, hypotheses, community, competitors, app ids, query buckets.
+engine/src/provemewrong.js  THE product: full run (SERP → Unlocker → Scraper → out/verdict-input.json) and `--quick` (stage path, < 30 s).
+engine/src/ask.js        One SERP call, printed for a room. `node src/ask.js "<query>"`; `--cached` = offline fallback.
 engine/src/play.js       Google Play reviews via Web Scraper API (`--snapshot <id>` resume, `--unlocker` fallback) → out/play-reviews.json.
 engine/src/clusters.js   THE cluster method (regexes) — `node src/clusters.js` reproduces the page percentages.
 engine/src/verify.js     Integrity gate: quotes verbatim · clusters computed · page blob identical · counts match. Run before republish.

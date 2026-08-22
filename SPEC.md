@@ -1,4 +1,4 @@
-# Moment — Specification
+# Prove Me Wrong — Specification
 
 Version 2.0 · Bright Data GTM event, Aug 22, 2026
 
@@ -10,11 +10,11 @@ Meditation apps sell calm and deliver a marketplace: ten thousand sessions, stre
 
 **The bet.** [Moment](https://moment.szlezingier.com): one sentence about how you want to move through today, a pause every 30 minutes, one minute to breathe and choose again. Meditation inside the day, not beside it.
 
-**The GTM question this repo answers:** can the web break that hypothesis before anyone pitches it? Instead of searching for agreement, the engine runs queries written to refute it, and reports what held and what pushed back.
+**The product.** Prove Me Wrong: you give it a hypothesis in two sentences (`engine/hypothesis.json`), the community where your users tell the truth and your would-be competitors; it goes to the web through three Bright Data APIs and returns a verdict — what held, what was refuted, what nobody is doing — every line a verbatim quote or a computed number, every source credited by the path that served it. Moment is the worked example; everything below is specified for the product and verified on the example.
 
 ## 2. What gets built
 
-1. **The engine** (`engine/`) — a Node.js pipeline that collects market signal through Bright Data, distills it into a research object (a coding agent does the analysis from the corpus), and injects it into the page.
+1. **The engine** (`engine/`) — `provemewrong.js` runs three phases from `hypothesis.json` (SERP argument → Unlocker full text → Web Scraper reviews) into `out/verdict-input.json`; a coding agent turns the rows into `research.json`; `run.js --inject-only` injects it. `--quick` is the 30-second stage path (SERP only, 4 queries, a first-pass verdict line, never throws on an empty bucket).
 2. **The page** (`page/index.html`) — a scroll-based storytelling page that renders the research object and ends in a working one-minute Moment. The page is the demo, the deliverable and the pitch.
 3. **The deck and talk** (`docs/`) — the same eight beats for a Bright Data audience, with one live API call inside.
 
@@ -44,9 +44,15 @@ The page renders scenes 5–6 from one embedded blob: `<script id="research-data
 {
   "sources":  [ { "api": "SERP API", "what": "104 search results from 12 questions …", "from": "…" } ],
   "quotes":   [ { "text": "verbatim, lightly trimmed with …, never invented", "src": "r/meditation · via bright data serp" } ],
-  "clusters": [ { "pct": "52%", "label": "Paywall fatigue", "of": "of negative reviews" } ]
+  "clusters": [ { "pct": "52%", "label": "Paywall fatigue", "of": "of negative reviews" } ],
+  "product":  { "name": "Moment", "url": "https://moment.szlezingier.com" },
+  "hypotheses": { "H1": "…", "H2": "…" },
+  "verdict":  { "H1": "held", "H2": "held for the people it fails", "pushback": "the interrupt is not new", "unclaimed": "remembering your own intention at the moment it matters" },
+  "counter_evidence": [ { "kind": "competitor | counter", "name": "One-Moment Meditation® (#1 and #2 for the minute)", "what": "…", "link": "…" } ]
 }
 ```
+
+`product`, `hypotheses`, `verdict` and `counter_evidence` are optional: the renderer shows the hero eyebrow, the hypotheses list, the pushback block (competitors → "all exist", counters → "not everyone agrees") and the unclaimed line when they are present, and falls back to the authored copy when they are not. `run.js inject()` and `verify.js` share one `blobOf()` so the two sides cannot drift.
 
 Rules: exactly 3 `sources` and 3 `clusters`; 3–5 `quotes`. `quotes[].text` must be verbatim from `engine/out/corpus.json`, `moment-serp.json` or `play-reviews.json`. `pct` is computed by `engine/src/clusters.js` (whole numbers; classes are non-exclusive, so shares need not sum to 100). `engine/src/verify.js` enforces all of this and the byte-identity of the blob with `research.json`. The full `research.json` additionally carries `hypothesis.verdict`, `counter_evidence`, `insights` and `meta` (corpus sizes, method, attribution) — those feed the deck and talk, not the page.
 

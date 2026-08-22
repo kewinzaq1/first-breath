@@ -1,12 +1,22 @@
-# Moment — the web tried to break it first
+# Prove Me Wrong — give it your idea, it asks the web to break it
 
-**A go-to-market story told by the web itself.** Built for the Bright Data GTM event, Aug 22, 2026.
+**A hypothesis-breaker whose only moving part is Bright Data.** Built for the Bright Data GTM event, Aug 22, 2026.
 
-> Repo name note: this repository (and the published artifact) is still called **First Breath**, the project's original working title. The product, the page, the deck and the talk are all about **Moment**.
+You give it two sentences you believe, the community where your users tell the truth, and the competitors you fear. It goes to the web through three Bright Data APIs — each for what it is best at — and comes back with a verdict: *what held, what was refuted, what nobody is doing* — every line a verbatim quote or a computed number, every source credited by the path that served it (including the gated ones, with the error text). A coding agent is the analyst.
 
-**Live page:** https://claude.ai/code/artifact/9771a3f5-ac0a-4d4d-8101-293b0aa82f15 · **Product:** https://moment.szlezingier.com
+**The worked example is Moment** (Kew's own idea — https://moment.szlezingier.com): its verdict page is the live artifact below, and the eight beats under it are how the talk tells it.
 
-## The story, in eight beats
+> Repo name note: this repository (and the published artifact) is still called **First Breath**, the project's original working title.
+
+**Live verdict page:** https://claude.ai/code/artifact/9771a3f5-ac0a-4d4d-8101-293b0aa82f15
+
+```bash
+cd engine
+node src/provemewrong.js --quick "Developers want an AI code reviewer that blocks merges" --community reddit.com/r/ExperiencedDevs   # 30 s, SERP only
+node src/provemewrong.js                       # full run from hypothesis.json: SERP → Unlocker → Web Scraper → out/verdict-input.json
+```
+
+## The worked example — Moment, in eight beats
 
 1. **The pain.** Meditation apps sell calm and deliver a marketplace — ten thousand sessions, streaks, paywalls. And even when it works, the calm stays on the cushion: you sit for twenty minutes, feel present, then snap at your kid at 6pm, eat the second plate, scroll until 2am. The practice never reaches the moment where life actually happens.
 2. **The bet.** Two hypotheses — **H1:** apps overwhelm people with content and choice; **H2:** the calm stays in the session, people are still reactive in real life. The product that follows is **Moment**: one sentence about how you want to move through today, a pause every 30 minutes, one minute to breathe and choose again. Meditation *inside* the day, not beside it.
@@ -39,7 +49,9 @@
 
 | Path | What it is |
 |---|---|
-| `page/index.html` | The scrollytelling page — one self-contained file; scenes 5–6 render from the embedded `research-data` blob; the last scene is the one-minute Moment |
+| `page/index.html` | The verdict page — one self-contained file; hero eyebrow, hypotheses, source cards, quotes, clusters, pushback and the unclaimed job all render from the embedded `research-data` blob; the last scene is the product's own CTA (for Moment: the one-minute Moment) |
+| `engine/hypothesis.json` | The input: product, two hypotheses, community, competitors, app ids, query buckets (gap / refute / competition) |
+| `engine/src/provemewrong.js` | The product: full run (SERP → Unlocker full text → Web Scraper reviews → `out/verdict-input.json`) and `--quick` (4 parallel SERP calls, first-pass verdict, < 30 s) |
 | `engine/src/run.js` | Orchestrator: collect → analyze → inject (`--collect-only`, `--inject-only`) |
 | `engine/src/question.js` | The 12-query hypothesis sweep (gap / want / competition) → `out/moment-serp.json` |
 | `engine/src/play.js` | Google Play reviews through the Web Scraper API (Unlocker fallback) → `out/play-reviews.json` |
@@ -58,10 +70,12 @@ cd engine
 npm install
 cp .env.example .env            # BRIGHTDATA_API_TOKEN + zone names (.env is auto-loaded by src/loadenv.js)
 
-node src/run.js --collect-only  # reviews, reddit-via-SERP, 5 landscape queries → out/corpus.json
-node src/question.js            # 12 hypothesis queries → out/moment-serp.json
-node src/play.js                # Google Play reviews via Web Scraper API → out/play-reviews.json
-node src/ask.js "how to remember my intention for the day"   # the live step
+node src/provemewrong.js        # the product: hypothesis.json → SERP (12 queries) → Unlocker (top 5 pages) → Web Scraper (Play reviews) → out/verdict-input.json
+node src/provemewrong.js --quick "<hypothesis>" --community reddit.com/r/<sub>   # the 30-second stage path
+node src/run.js --collect-only  # App Store feed + reddit-via-SERP + 5 landscape queries → out/corpus.json
+node src/question.js            # the original 12-query sweep → out/moment-serp.json
+node src/play.js                # Google Play reviews alone → out/play-reviews.json
+node src/clusters.js && node src/verify.js   # reproduce the percentages · check everything before a republish
 
 node src/run.js --inject-only   # out/research.json → page/index.html
 ```

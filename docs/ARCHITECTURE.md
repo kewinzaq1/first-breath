@@ -31,6 +31,18 @@ GET  /datasets/v3/snapshot/{snapshot_id}?format=json                            
 
 The dataset id comes from `GET /datasets/list` (1,743 datasets; "Google Play Store reviews" is `gd_m6zagkt024uwvvwuyu`). The poller tolerates transient network errors and re-reads a snapshot that reports `ready` before its rows are flushed.
 
+## The product path — `engine/src/provemewrong.js`
+
+`hypothesis.json` in, `out/verdict-input.json` out, three phases in order:
+
+1. **SERP — the argument.** The query buckets from `hypothesis.json` (`gap` / `refute` / `competition`; bar: ≥ 12 queries, ≥ 4 refute) through the SERP zone; each row carries `bucket · query · rank · title · link · snippet · via`. Moment, Aug 22: 12/12 queries, 92 rows.
+2. **Web Unlocker — the full text.** The top 5 non-community links from `gap` + `competition` (one per host) through the Unlocker; kept: `<title>`, meta description, the first 1,500 characters of visible text, bytes, ms. Failures are rows too, with the error text: an HTTP 200 with an empty body is recorded as failed, never as ok. Moment, Aug 22: 4/5 (play.google.com 1.2 MB, headspace.com, healthline.com, lynnrossy.com; apps.apple.com empty body).
+3. **Web Scraper API — reviews at scale.** `collectPlayReviews()` from `play.js` (trigger → poll → snapshot; `--play-snapshot <id>` reuses one). Falls back to the Unlocker on the Play pages if the trigger fails.
+
+It prints one honest line per run — `serp 92 rows (12/12 queries) · unlocker 4/5 pages (1 gated/failed) · scraper 300 reviews via Web Scraper API` — and hands off to the analyst: a coding agent reads the rows (plus `corpus.json` for the App Store feed) and writes `research.json`.
+
+**`--quick "<hypothesis>" --community reddit.com/r/<sub>`** is the stage path: the mechanism is the clause after "X want / need …"; four SERP calls run in parallel (the sentence, `site:<community> <mechanism>`, `<mechanism> annoying OR useless OR "doesn't work"`, `<mechanism> app OR tool`); the verdict line comes from three explicit rules (top gap result echoes ≥ 2 key terms → *held*; refute top result carries a negation → *pushback on page one*; a product-looking result in the competition top 3 → *mechanism exists*, else *unclaimed*). Labelled "first pass — the full run takes four minutes". Rehearsed on four hypotheses: 3.6–28 s, never threw, including on an empty bucket.
+
 ## Stage 1 — collect
 
 Three scripts, one corpus each, all in `engine/out/` (gitignored; the corpora only exist where a run happened — never delete them).
