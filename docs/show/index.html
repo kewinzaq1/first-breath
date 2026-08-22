@@ -78,63 +78,73 @@
   .d4 { animation-delay: 2.8s !important; } .d5 { animation-delay: 3.6s !important; } .d6 { animation-delay: 4.6s !important; } .d7 { animation-delay: 5.6s !important; }
 
   /* ---------- scene specifics ---------- */
+  /* request / response cards — the mechanics of every API scene */
+  .card { font-family: var(--mono); font-size: clamp(.72rem, 1.15vw, 1.05rem); line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .6rem; padding: .9rem 1.1rem; text-align: left; white-space: pre-wrap; word-break: break-word; overflow: hidden; }
+  .card.req { border-color: var(--ember-dim); }
+  .card .k { color: var(--data); } .card .s { color: var(--ember-hi); } .card .c { color: var(--muted); } .card .h { color: var(--data-hi); font-weight: 500; } .card .bad { color: #E0664A; }
+  .card .t { display: block; font-size: .75em; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: .35rem; }
+  .card.req .t { color: var(--ember); }
+  .two { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5vw; align-items: center; width: min(94vw, 1500px); }
+  .arrow { font-family: var(--mono); color: var(--faint); font-size: clamp(1.2rem, 2.4vw, 2.2rem); }
+
   /* 1 · title */
-  .s1 .big { margin-top: 1.5vh; }
-  .s1 svg.founder { left: 50%; top: 0; transform: translateX(-50%); }
-  .s1 .cast { height: 34vh; }
+  .s1 .cast { height: 44vh; }
+  .s1 svg.founder { left: 30%; bottom: 0; }
+  .s1 svg.web { right: 22%; top: 0; }
+  .s1 .say-f { left: 24%; top: 4%; }
+  .s1 .say-w { right: 14%; bottom: 10%; }
+  .s1 .big { margin-top: 1vh; }
 
-  /* 2 · the disease */
-  .s2 svg.founder { left: 18%; bottom: 8%; }
-  .s2 svg.web { right: 6%; top: 4%; }
-  .s2 .say-f { left: 12%; top: 6%; }
-  .s2 .say-w { right: 4%; bottom: 16%; }
-  .scene.active .s2-ears { animation: ears .6s ease 3.2s both; }
-  @keyframes ears { from { transform: translate(0,0); } to { transform: translate(0,-18px); } }
+  /* 2 · give it your idea — and the one endpoint */
+  .s2 .two { grid-template-columns: 1.1fr auto .9fr; }
+  .s2 svg.founder { position: absolute; right: 2%; bottom: 14vh; width: clamp(110px, 12vw, 180px); }
+  .s2 .say-f { right: 2%; top: 8vh; }
 
-  /* 3 · hypothesis.json */
-  .code { font-family: var(--mono); font-size: clamp(.8rem, 1.35vw, 1.25rem); line-height: 1.55; color: var(--ink); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .6rem; padding: 1.2rem 1.6rem; text-align: left; white-space: pre; overflow: hidden; max-width: 92vw; }
-  .code .k { color: var(--data); } .code .s { color: var(--ember-hi); } .code .c { color: var(--faint); }
-  .s3 svg.founder { right: 4%; bottom: 2%; }
-  .s3 .say-f { right: 4%; top: 6%; }
-  .typed { display: inline-block; overflow: hidden; white-space: pre; vertical-align: bottom; }
+  /* 3 · SERP */
+  .s3 .two { margin-bottom: 2vh; }
+  .s3 svg.owl { width: clamp(90px, 10vw, 150px); }
+  .scene.active .s3 .owl-fly, .scene.active .owl-fly { animation: owlFly 3s ease-in-out 1 both; }
+  @keyframes owlFly { 0% { transform: translateX(-40%) rotate(-6deg); } 50% { transform: translateX(40%) rotate(6deg); } 100% { transform: translateX(0); } }
+  .bags { display: flex; gap: 1.2vw; align-items: stretch; width: min(94vw, 1500px); }
+  .bag { flex: 1; background: var(--surface); border: 1px solid #2A2116; border-radius: .8rem; padding: .8rem 1rem; text-align: left; }
+  .bag h4 { font-family: var(--mono); font-size: clamp(.65rem, .9vw, .85rem); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: .35rem; }
+  .bag.hurt { border-color: var(--ember-dim); } .bag.hurt h4 { color: var(--ember); }
+  .bag p { font-family: var(--display); font-style: italic; font-size: clamp(.85rem, 1.25vw, 1.15rem); line-height: 1.3; color: var(--data-hi); }
+  .bag p.note { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: clamp(.62rem, .85vw, .8rem); margin-top: .35rem; }
 
-  /* 4 · the three couriers */
-  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; width: min(94vw, 1500px); height: 60vh; }
-  .lane { position: relative; border: 1px solid #1E2732; background: linear-gradient(180deg, rgba(22,18,16,.6), rgba(7,6,5,.2)); border-radius: .8rem; padding: 1rem; overflow: hidden; }
-  .lane h3 { font-family: var(--mono); font-size: clamp(.7rem, 1vw, .9rem); letter-spacing: .2em; text-transform: uppercase; color: var(--data); text-align: left; }
-  .lane .tag { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; font-family: var(--mono); font-size: clamp(.75rem, 1.1vw, 1rem); color: var(--ember); text-align: left; line-height: 1.5; }
-  .lane .tag small { display: block; color: var(--muted); }
-  .lane .char { left: 50%; top: 34%; transform: translate(-50%, -50%); }
-  .scene.active .owl-go { animation: owlGo 3.2s ease-in-out 1 both; }
-  @keyframes owlGo { 0% { transform: translate(-50%,-50%) ; } 35% { transform: translate(120%,-90%) rotate(8deg); } 60% { transform: translate(120%,-90%) rotate(-4deg); } 100% { transform: translate(-50%,-50%); } }
-  .scroll { position: absolute; left: 50%; top: 60%; transform: translateX(-50%); width: 86%; font-family: var(--mono); font-size: clamp(.65rem, .95vw, .9rem); color: var(--data-hi); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .4rem; padding: .5rem .8rem; white-space: pre-wrap; text-align: left; line-height: 1.4; }
-  .doors { position: absolute; left: 8%; right: 8%; top: 10%; display: flex; justify-content: space-between; }
-  .door { width: 26%; aspect-ratio: 3 / 4; perspective: 600px; position: relative; }
-  .door .frame { position: absolute; inset: 0; border: 2px solid var(--faint); border-radius: .4rem .4rem 0 0; background: var(--ground-deep); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(.6rem, .9vw, .85rem); color: var(--muted); text-align: center; padding: .3rem; }
-  .door .leaf { position: absolute; inset: 0; background: var(--surface); border: 2px solid var(--ember-dim); border-radius: .4rem .4rem 0 0; transform-origin: left; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .5rem; font-family: var(--mono); font-size: clamp(.6rem, .9vw, .85rem); color: var(--ink); }
+  /* 4 · Unlocker */
+  .s4 .two { grid-template-columns: .8fr auto 1.2fr; }
+  .doors { display: flex; justify-content: space-between; gap: 1vw; }
+  .door { flex: 1; position: relative; perspective: 700px; }
+  .door .sign { font-family: var(--mono); font-size: clamp(.6rem, .85vw, .8rem); color: var(--ember); text-align: center; margin-bottom: .3rem; white-space: nowrap; }
+  .door .box { position: relative; aspect-ratio: 4 / 3; }
+  .door .frame { position: absolute; inset: 0; border: 2px solid var(--faint); border-radius: .4rem .4rem 0 0; background: var(--ground-deep); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(.6rem, .85vw, .8rem); color: var(--muted); text-align: center; padding: .3rem; line-height: 1.4; }
+  .door .leaf { position: absolute; inset: 0; background: var(--surface); border: 2px solid var(--ember-dim); border-radius: .4rem .4rem 0 0; transform-origin: left; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .4rem; font-family: var(--mono); font-size: clamp(.6rem, .85vw, .8rem); color: var(--ink); }
   .scene.active .door.open .leaf { animation: doorOpen 1s ease 1 both; }
-  @keyframes doorOpen { to { transform: rotateY(-105deg); } }
+  @keyframes doorOpen { to { transform: rotateY(-108deg); } }
   .scene.active .door.shut .leaf { animation: doorShake .5s ease 2 both; }
   @keyframes doorShake { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-6px); } }
-  .door .sign { position: absolute; top: -1.6rem; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: clamp(.55rem, .8vw, .8rem); color: var(--ember); white-space: nowrap; }
-  .scene.active .harv-go { animation: harvGo 3.6s ease-in-out 1 both; top: 44%; }
-  @keyframes harvGo { 0% { transform: translate(-190%,-50%); } 100% { transform: translate(-50%,-50%); } }
-  .rows { position: absolute; left: 10%; right: 10%; top: 66%; display: flex; gap: 3px; align-items: flex-end; height: 18%; }
+  .door .hdr { margin-top: .5rem; font-family: var(--mono); font-size: clamp(.58rem, .8vw, .78rem); color: var(--data-hi); text-align: left; line-height: 1.45; white-space: pre; }
+  .door .hdr .bad { color: #E0664A; } .door .hdr .ok { color: var(--ember); }
+  .s4 svg.bouncer { position: absolute; left: 3%; bottom: 14vh; width: clamp(90px, 10vw, 150px); }
+  .notebook { margin-top: 1.5vh; width: min(94vw, 1500px); font-family: var(--mono); font-size: clamp(.7rem, 1vw, .95rem); color: var(--muted); text-align: left; background: var(--ground-deep); border: 1px dashed var(--faint); border-radius: .5rem; padding: .6rem 1rem; line-height: 1.6; }
+  .notebook b { color: var(--ember); font-weight: 500; }
+
+  /* 5 · Scraper */
+  .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1vw; width: min(94vw, 1500px); }
+  .pipe .card { min-height: 22vh; white-space: pre-wrap; word-break: break-word; }
+  .pipe .n { display: inline-block; font-family: var(--mono); color: var(--ember); font-size: .8em; margin-right: .4rem; }
+  .spinner { display: inline-block; width: .8em; height: .8em; border: 2px solid var(--data-dim); border-top-color: var(--data-hi); border-radius: 50%; vertical-align: middle; animation: spin 1s linear infinite; }
+  .scene.active .ready { animation: fade .4s ease 3.4s both; }
+  .scene.active .running { animation: gone .3s ease 3.4s both; }
+  @keyframes gone { to { opacity: 0; height: 0; } }
+  .track { position: relative; width: min(94vw, 1500px); height: 10vh; margin-top: 1vh; }
+  .scene.active .harv-go { animation: harvGo 3.4s ease-in-out 1 both; position: absolute; top: 0; left: 0; width: clamp(120px, 13vw, 200px); }
+  @keyframes harvGo { 0% { transform: translateX(0); } 100% { transform: translateX(calc(min(94vw, 1500px) - 100%)); } }
+  .rows { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 3px; align-items: flex-end; height: 60%; }
   .rows i { flex: 1; background: var(--data); opacity: 0; height: 100%; transform-origin: bottom; }
   .scene.active .rows i { animation: rowUp .3s ease both; }
   @keyframes rowUp { from { opacity: 0; transform: scaleY(0); } to { opacity: .85; transform: scaleY(var(--h, 1)); } }
-  .apps { position: absolute; left: 12%; right: 12%; top: 16%; display: flex; justify-content: space-between; }
-  .app { width: 22%; aspect-ratio: 1; border-radius: 22%; background: var(--surface); border: 1px solid #2A2116; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(.6rem, .9vw, .85rem); color: var(--muted); }
-
-  /* 5 · the pattern */
-  .bags { display: flex; gap: 2vw; align-items: flex-end; }
-  .bag { width: clamp(160px, 24vw, 380px); background: var(--surface); border: 1px solid #2A2116; border-radius: .8rem; padding: 1rem; text-align: left; }
-  .bag h4 { font-family: var(--mono); font-size: clamp(.7rem, 1vw, .9rem); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
-  .bag.hurt { border-color: var(--ember-dim); } .bag.hurt h4 { color: var(--ember); }
-  .bag p { font-family: var(--display); font-style: italic; font-size: clamp(.9rem, 1.4vw, 1.3rem); line-height: 1.35; color: var(--ink); }
-  .bag p.q { color: var(--data-hi); }
-  .s5 svg.founder { left: 3%; bottom: 4%; } .s5 svg.owl { right: 4%; top: 2%; }
-  .s5 .say-f { left: 2%; top: 4%; } .s5 .say-o { right: 2%; bottom: 18%; }
 
   /* 6 · what held */
   .bars { display: grid; grid-template-columns: max-content 1fr max-content; gap: .8rem 1.2rem; align-items: center; width: min(88vw, 1100px); }
@@ -169,17 +179,20 @@
   /* 8 · your turn */
   .cmd { font-family: var(--mono); font-size: clamp(.9rem, 1.6vw, 1.5rem); color: var(--ink); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .6rem; padding: 1rem 1.4rem; text-align: left; max-width: 92vw; white-space: pre-wrap; line-height: 1.5; }
   .cmd .p { color: var(--ember); } .cmd .k { color: var(--data); }
-  .s8 svg.web { position: absolute; right: 3%; top: 6%; }
-  .s8 .say-w { right: 2%; top: 40%; }
+  .under { margin-top: 2vh; font-family: var(--mono); font-size: clamp(.7rem, 1vw, .95rem); color: var(--muted); line-height: 1.7; max-width: 92vw; }
+  .under b { color: var(--data); font-weight: 500; }
+  .s8 svg.web { position: absolute; right: 3%; top: 6%; width: clamp(160px, 20vw, 300px); }
+  .s8 .say-w { right: 2%; top: 34%; }
 
   /* 9 · close */
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; width: min(92vw, 1300px); margin-top: 2vh; }
   .step { background: var(--surface); border: 1px solid #2A2116; border-radius: .8rem; padding: 1.2rem; text-align: left; }
   .step h4 { font-family: var(--display); font-size: clamp(1rem, 1.7vw, 1.5rem); color: var(--ember); }
   .step p { margin-top: .4rem; color: var(--muted); font-size: clamp(.85rem, 1.2vw, 1.1rem); line-height: 1.4; }
+  .step code { font-family: var(--mono); color: var(--data-hi); font-size: .9em; }
   .links { margin-top: 2vh; font-family: var(--mono); font-size: clamp(.65rem, .95vw, .9rem); letter-spacing: .12em; color: var(--faint); }
   .s9 svg.founder, .s9 svg.web { position: absolute; bottom: 0; }
-  .s9 svg.founder { left: 24%; } .s9 svg.web { right: 20%; }
+  .s9 svg.founder { left: 22%; bottom: 14vh; } .s9 svg.web { right: 18%; bottom: 13vh; width: clamp(160px, 20vw, 300px); }
 
   /* ---------- chrome: progress, timer, notes ---------- */
   .dots { position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
@@ -288,95 +301,140 @@
 
 <div class="stage" id="stage">
 
-  <!-- 1 · TITLE -->
-  <section class="scene s1 active" data-say="Every founder in this room has shipped a positioning the web could have refuted for five dollars. We don't check. We're scared of the answer. So I built the thing that asks. This is Prove Me Wrong, and the only moving part is Bright Data.">
+  <!-- 1 · THE FEAR -->
+  <section class="scene s1 active" data-say="Every founder in this room has shipped a positioning the web could have refuted for five dollars. We don&#x27;t check — we&#x27;re scared of the answer. Meet the Founder. Any resemblance to the speaker is intentional. I built the thing that asks: Prove Me Wrong. Its only moving part is Bright Data.">
     <p class="eyebrow in-up">a bright data hypothesis-breaker · aug 22, 2026</p>
+    <h1 class="big in-up d1">Prove <em>Me</em> Wrong</h1>
     <div class="cast">
-      <svg class="char founder breathe pop d1" viewBox="0 0 200 190"><use href="#founder"/></svg>
+      <svg class="char founder breathe in-left d2" viewBox="0 0 200 190"><use href="#founder"/></svg>
+      <div class="say pop d3 say-f">Users are going to <b>LOVE</b> this.</div>
+      <svg class="char web hover in-right d3" viewBox="0 0 360 175"><use href="#web"/></svg>
+      <div class="say web flip up pop d4 say-w">will they, though?</div>
     </div>
-    <h1 class="big in-up d2">Prove <em>Me</em> Wrong</h1>
-    <p class="bold in-up d3">Every founder in this room has shipped a positioning the web could have refuted for <em>five dollars.</em></p>
+    <p class="bold in-up d5">Every founder here has shipped a positioning the web could have refuted for <em>five dollars.</em></p>
   </section>
 
-  <!-- 2 · THE DISEASE -->
-  <section class="scene s2" data-say="Meet the founder. Any resemblance to the speaker is purely intentional. He has an idea, he loves it, and he has never once asked anyone who might disagree. That's the disease: we ship first and find out later — from a tweet. The web knew. The web always knew. We just never asked it the uncomfortable question.">
-    <p class="eyebrow in-up">the problem · a love story</p>
-    <div class="cast">
-      <svg class="char founder breathe in-left" viewBox="0 0 200 190"><use href="#founder"/></svg>
-      <div class="say pop d1 say-f">Users are going to <b>LOVE</b> this.</div>
-      <svg class="char web hover in-right d2" viewBox="0 0 360 175"><use href="#web"/></svg>
-      <div class="say web flip up pop d3 say-w">will they, though?</div>
-    </div>
-    <p class="bold in-up d4">We never check. <em>We're afraid of the answer.</em></p>
-  </section>
-
-  <!-- 3 · GIVE IT YOUR IDEA -->
-  <section class="scene s3" data-say="So here's the deal. You give it what you believe — two sentences, no more. The community where your users tell the truth. And the competitors you're secretly scared of. That's the whole input. Mine was Moment, a meditation app. I believed the apps overwhelm people, and that the calm never leaves the session. Confident. Unverified. Perfect test subject.">
+  <!-- 2 · GIVE IT YOUR IDEA · ONE ENDPOINT -->
+  <section class="scene s2" data-say="Two sentences you believe. The community where your users tell the truth. The competitors you&#x27;re scared of. That&#x27;s the whole input — he had a deck, I know. Mine was Moment, a meditation app: the apps overwhelm people, and the calm never leaves the session. Everything that happens next is one endpoint: POST api.brightdata.com/request. A Bearer token, a zone, a URL. The zone decides the magic.">
     <p class="eyebrow in-up">step one · give it your idea</p>
-    <div class="code in-up d1"><span class="c">// engine/hypothesis.json</span>
-{ <span class="k">"product"</span>: <span class="s">"Moment"</span>,
+    <div class="two">
+      <div class="card in-left"><span class="t">engine/hypothesis.json</span>{ <span class="k">"product"</span>: <span class="s">"Moment"</span>,
   <span class="k">"hypotheses"</span>: {
-    <span class="k">"H1"</span>: <span class="s">"Meditation apps overwhelm people with content and choice."</span>,
-    <span class="k">"H2"</span>: <span class="s">"The calm stays in the session: people are still reactive in real life."</span> },
-  <span class="k">"community"</span>:   [<span class="s">"reddit.com/r/Meditation"</span>, <span class="s">"reddit.com/r/selfimprovement"</span>],
+    <span class="k">"H1"</span>: <span class="s">"Meditation apps overwhelm people
+           with content and choice."</span>,
+    <span class="k">"H2"</span>: <span class="s">"The calm stays in the session:
+           people are still reactive in real life."</span> },
+  <span class="k">"community"</span>:   [<span class="s">"reddit.com/r/Meditation"</span>, …],
   <span class="k">"competitors"</span>: [<span class="s">"Calm"</span>, <span class="s">"Headspace"</span>, <span class="s">"Waking Up"</span>] }</div>
-    <svg class="char founder breathe in-right d2" viewBox="0 0 200 190" style="position:absolute; right:4%; bottom:14vh;"><use href="#founder"/></svg>
-    <div class="say pop d3" style="position:absolute; right:4%; top:10vh;">Two sentences? I have a <b>deck.</b></div>
-    <p class="bold in-up d3">Two sentences. One community. <em>The people you're scared of.</em></p>
-  </section>
+      <div class="arrow fade d1">→</div>
+      <div class="card req in-right d1"><span class="t">the one endpoint · everything below is this call</span><span class="h">POST https://api.brightdata.com/request</span>
+<span class="c">Authorization:</span> Bearer $BRIGHTDATA_API_TOKEN
+{ <span class="k">"zone"</span>: <span class="s">"serp_api1"</span> <span class="c">| "web_unlocker1"</span>,
+  <span class="k">"url"</span>:  <span class="s">"…"</span>,
+  <span class="k">"format"</span>: <span class="s">"raw"</span> }
 
-  <!-- 4 · THE THREE COURIERS -->
-  <section class="scene s4" data-say="Then three couriers go out. The SERP API — the owl — reads Google so I don't have to: rank, title, link, snippet, already parsed. Zero HTML in my life. The Web Unlocker is the bouncer: he opens doors. Google Play? Open, 1.2 megabytes. Apple? Door opens, nobody home — 200 OK, empty body. Reddit? Not on the list without KYC. He writes every refusal down — that's the point. And the Web Scraper API is the harvester: three app-store URLs in, three hundred structured reviews out, three minutes, zero errors.">
-    <p class="eyebrow in-up">step two · three bright data apis, each for what it's best at</p>
-    <div class="lanes">
-      <div class="lane in-up">
-        <h3>serp api · the owl</h3>
-        <svg class="char owl owl-go" viewBox="0 0 170 160"><use href="#owl"/></svg>
-        <div class="scroll pop d5">{ rank: 1, title, link, snippet }
-people_also_ask · related</div>
-        <div class="tag fade d6">12 queries · 92 rows · 12/12 answered<small>parsed by Bright Data · zero HTML touched</small></div>
-      </div>
-      <div class="lane in-up d1">
-        <h3>web unlocker · the bouncer</h3>
-        <div class="doors">
-          <div class="door open"><span class="sign">play.google.com</span><div class="frame">1.2 MB<br>200 OK</div><div class="leaf">PLAY</div></div>
-          <div class="door open" style="animation-delay:1s"><span class="sign">apps.apple.com</span><div class="frame">200 OK<br>nobody home</div><div class="leaf" style="animation-delay:1.2s">APPLE</div></div>
-          <div class="door shut"><span class="sign">reddit.com</span><div class="frame"></div><div class="leaf" style="animation-delay:2.4s">KYC ONLY</div></div>
-        </div>
-        <svg class="char bouncer breathe" viewBox="0 0 170 180" style="top:54%"><use href="#bouncer"/></svg>
-        <div class="tag fade d6">4/5 pages opened · refusals written down<small>"destination_ip_prohibited" goes in the file, verbatim</small></div>
-      </div>
-      <div class="lane in-up d2">
-        <h3>web scraper api · the harvester</h3>
-        <div class="apps"><div class="app">calm</div><div class="app">headspace</div><div class="app">waking up</div></div>
-        <svg class="char harvester harv-go" viewBox="0 0 230 170"><use href="#harvester"/></svg>
-        <div class="rows">
-          <i style="--h:.4; animation-delay:3.6s"></i><i style="--h:.7; animation-delay:3.7s"></i><i style="--h:.5; animation-delay:3.8s"></i><i style="--h:.9; animation-delay:3.9s"></i><i style="--h:.6; animation-delay:4s"></i><i style="--h:.8; animation-delay:4.1s"></i><i style="--h:.45; animation-delay:4.2s"></i><i style="--h:1; animation-delay:4.3s"></i><i style="--h:.65; animation-delay:4.4s"></i><i style="--h:.85; animation-delay:4.5s"></i><i style="--h:.55; animation-delay:4.6s"></i><i style="--h:.75; animation-delay:4.7s"></i>
-        </div>
-        <div class="tag fade d6">300 reviews · 179 s · 0 errors<small>trigger → poll → snapshot · dataset gd_m6zagkt024uwvvwuyu</small></div>
-      </div>
+<span class="c">// the zone decides the behaviour:
+// SERP zone   → google, parsed for you
+// Unlocker    → any page, blocks handled
+// + /datasets/v3 for the Web Scraper API</span></div>
     </div>
-    <p class="bold in-up d7">Three APIs. One Bearer token. <em>Every refusal written down.</em></p>
+    <svg class="char founder breathe in-right d2" viewBox="0 0 200 190"><use href="#founder"/></svg>
+    <div class="say pop d3 say-f">Two sentences? I have a <b>deck.</b></div>
+    <p class="bold in-up d3">Two sentences in. <em>One endpoint does the asking.</em></p>
   </section>
 
-  <!-- 5 · THE PATTERN -->
-  <section class="scene s5" data-say="Here's the trick that makes it research instead of marketing. The queries come in three bags. Gap — the pain, in the user's words. Competition — written to hurt. And refute — the opposite of what I believe. 'Meditation made me LESS reactive.' The founder hates this bag. Why would you search for THAT? Because you won't. If you only search for people who agree with you, the web will happily agree.">
-    <p class="eyebrow in-up">the pattern · a third of the queries are written to hurt you</p>
+  <!-- 3 · SERP API · THE OWL -->
+  <section class="scene s3" data-say="Courier one: the SERP API. Hand Bright Data a Google URL with one extra parameter — brd_json=1 — and instead of HTML you get the results page as JSON: rank, title, link, snippet. Zero HTML in my life. The trick that makes this research: three bags of queries. Gap — the pain, in their words. Competition — written to hurt. Refute — the opposite of what I believe. Why would you search for that? Because you won&#x27;t. And reddit is KYC-gated on the Unlocker — so I ask Google for site:reddit.com/r/Meditation instead. Twelve queries, ninety-two rows.">
+    <p class="eyebrow in-up">courier one · serp api · google, parsed for you</p>
+    <div class="two">
+      <div class="card req in-left"><span class="t">request</span><span class="h">POST /request</span>
+{ <span class="k">"zone"</span>: <span class="s">"serp_api1"</span>,
+  <span class="k">"url"</span>: <span class="s">"https://www.google.com/search
+          ?q=meditate+every+day+but+still+reactive
+          &amp;gl=us&amp;hl=en<span class="h">&amp;brd_json=1</span>"</span>,
+  <span class="k">"format"</span>: <span class="s">"raw"</span> }</div>
+      <div style="position:relative; width: clamp(110px, 12vw, 180px); height: clamp(110px, 12vw, 180px);"><svg class="char owl owl-fly" viewBox="0 0 170 160" style="position:absolute; inset:0; width:100%"><use href="#owl"/></svg></div>
+      <div class="card in-right d3"><span class="t">response · ≈ 1.5 s · already parsed</span>{ <span class="k">"organic"</span>: [
+    { <span class="k">"rank"</span>: 1,
+      <span class="k">"title"</span>: <span class="s">"I've been meditating almost every day
+              for a year and feel ..."</span>,
+      <span class="k">"link"</span>: <span class="s">"https://www.reddit.com/r/Meditation/…"</span>,
+      <span class="k">"description"</span>: <span class="s">"…"</span> }, … ],
+  <span class="k">"people_also_ask"</span>: [ … ],
+  <span class="k">"related"</span>: [ … ] }   <span class="c">// no HTML touched</span></div>
+    </div>
     <div class="bags">
-      <div class="bag in-up"><h4>gap</h4><p class="q">"meditate every day but still reactive"</p><p class="q">"site:reddit.com/r/Meditation still reactive after years"</p></div>
-      <div class="bag hurt in-up d1"><h4>refute · the opposite</h4><p class="q">"meditation made me less reactive"</p><p class="q">"does meditation carry over into daily life"</p></div>
-      <div class="bag hurt in-up d2"><h4>competition · to hurt</h4><p class="q">"mindfulness bell app random reminders"</p><p class="q">"one minute meditation reminder app"</p></div>
+      <div class="bag in-up d4"><h4>gap · the pain, in their words</h4><p>"meditate every day but still reactive"</p><p class="note">site:reddit.com/r/Meditation … — reddit via Google, no KYC needed</p></div>
+      <div class="bag hurt in-up d5"><h4>refute · the opposite of what I believe</h4><p>"meditation made me less reactive"</p><p class="note">the Founder: "why would you search for THAT?" — because you won't</p></div>
+      <div class="bag hurt in-up d6"><h4>competition · written to hurt</h4><p>"one minute meditation reminder app"</p><p class="note">12 queries · 4 refute · 92 rows · 12/12 answered</p></div>
     </div>
-    <svg class="char founder breathe in-left d3" viewBox="0 0 200 190" style="position:absolute; left:3%; bottom:14vh;"><use href="#founder"/></svg>
-    <div class="say pop d4" style="position:absolute; left:3%; top:8vh;">Why would you search for <b>that?</b></div>
-    <svg class="char owl hover in-right d3" viewBox="0 0 170 160" style="position:absolute; right:4%; top:6vh;"><use href="#owl"/></svg>
-    <div class="say web flip pop d5" style="position:absolute; right:3%; top:38vh;">because you won't.</div>
-    <p class="bold in-up d6">Search only for people who agree, <em>and the web will happily agree.</em></p>
+    <p class="bold in-up d7">Google, parsed. Zero HTML. <em>And a third of the queries written to hurt you.</em></p>
+  </section>
+
+  <!-- 4 · WEB UNLOCKER · THE BOUNCER -->
+  <section class="scene s4" data-say="Courier two: the Web Unlocker. Same endpoint, swap the zone — any URL comes back as the page body, blocks handled. Google Play: open, 1.2 megabytes. Apple: door opens, nobody home — HTTP 200, empty body. Reddit: policy-gated without KYC. The thing nobody tells you: Bright Data answers 200 either way. The truth is in the headers — x-brd-status-code, x-brd-error-code. Read them. The bouncer writes every refusal into the file, with the fallback already designed.">
+    <p class="eyebrow in-up">courier two · web unlocker · any page, blocks handled</p>
+    <div class="two">
+      <div class="card req in-left"><span class="t">request · same endpoint, different zone</span><span class="h">POST /request</span>
+{ <span class="k">"zone"</span>: <span class="s">"web_unlocker1"</span>,
+  <span class="k">"url"</span>: <span class="s">"https://play.google.com/store/apps/
+          details?id=com.calm.android"</span>,
+  <span class="k">"format"</span>: <span class="s">"raw"</span> }
+<span class="c">→ the page body. Unlocker handles the
+  blocks, the captchas, the fingerprints.</span></div>
+      <div class="arrow fade d1">→</div>
+      <div class="doors in-right d1">
+        <div class="door open"><div class="sign">play.google.com</div><div class="box"><div class="frame">1.2 MB<br>page body</div><div class="leaf">knock</div></div><div class="hdr">HTTP 200
+x-brd-status-code: <span class="ok">200</span></div></div>
+        <div class="door open"><div class="sign">apps.apple.com</div><div class="box"><div class="frame">nobody<br>home</div><div class="leaf" style="animation-delay:1.1s">knock</div></div><div class="hdr">HTTP 200
+body: <span class="bad">0 bytes</span></div></div>
+        <div class="door shut"><div class="sign">reddit.com</div><div class="box"><div class="frame"></div><div class="leaf" style="animation-delay:2.2s">KYC ONLY</div></div><div class="hdr">HTTP 200
+x-brd-status-code: <span class="bad">502</span>
+<span class="bad">Residential Failed (bad_endpoint):
+… no KYC access mode</span></div></div>
+      </div>
+    </div>
+    <div class="notebook in-up d4"><b>the bouncer's notebook</b> · every row carries <b>via</b> and the error text, verbatim · itunes.apple.com → <b>destination_ip_prohibited</b> → fallback: Apple's public review feed · reddit.com → KYC → fallback: <b>site:reddit.com/r/…</b> through the SERP zone · apps.apple.com → 200 with an empty body → recorded as <b>failed</b>, not ok</div>
+    <svg class="char bouncer breathe in-left d2" viewBox="0 0 170 180"><use href="#bouncer"/></svg>
+    <p class="bold in-up d5">Same endpoint. Different zone. <em>Every refusal written down.</em></p>
+  </section>
+
+  <!-- 5 · WEB SCRAPER API · THE HARVESTER -->
+  <section class="scene s5" data-say="Courier three: the Web Scraper API. Asynchronous, four calls. One: GET datasets/list — seventeen hundred ready-made scrapers; Google Play reviews is gd_m6zagkt. Two: POST trigger with that id and three Play-store URLs — you get a snapshot id. Three: poll progress until ready — three hundred records, zero errors. Four: download the snapshot as JSON: rating, text, helpful votes. Three URLs in. Three hundred rows out. Three minutes. One gotcha: the first download raced the ready flag and came back empty. The code re-downloads. Honest pipelines retry.">
+    <p class="eyebrow in-up">courier three · web scraper api · structured rows, asynchronous</p>
+    <div class="pipe">
+      <div class="card in-up"><span class="t"><span class="n">1</span>find the scraper</span><span class="h">GET /datasets/list</span>
+<span class="c">→ 1,743 datasets</span>
+"Google Play Store reviews"
+= <span class="s">gd_m6zagkt024uwvvwuyu</span></div>
+      <div class="card req in-up d1"><span class="t"><span class="n">2</span>trigger</span><span class="h">POST /datasets/v3/trigger</span>
+  ?dataset_id=<span class="s">gd_m6zagkt…</span>
+  &amp;limit_per_input=<span class="s">100</span>
+[{ <span class="k">url</span>: <span class="s">"…?id=com.calm.android"</span> },
+ { <span class="k">url</span>: <span class="s">"…headspace.android"</span> },
+ { <span class="k">url</span>: <span class="s">"…wakingup.android"</span> }]
+<span class="c">→</span> { <span class="k">snapshot_id</span>: <span class="s">"sd_mt3vk…"</span> }</div>
+      <div class="card in-up d2"><span class="t"><span class="n">3</span>poll</span><span class="h">GET /datasets/v3/progress/sd_mt3vk…</span>
+<span class="running"><span class="spinner"></span> status: <span class="s">"running"</span> …</span><span class="ready">status: <span class="s">"ready"</span>
+records: <span class="s">300</span> · errors: <span class="s">0</span>
+collection_duration: <span class="s">179 s</span></span></div>
+      <div class="card in-up d3"><span class="t"><span class="n">4</span>download</span><span class="h">GET /datasets/v3/snapshot/sd_mt3vk…?format=json</span>
+[{ <span class="k">review_rating</span>: 2,
+   <span class="k">review</span>: <span class="s">"While I like it to remind me to relax, it is sloooooooow…"</span>,
+   <span class="k">found_helpful</span>: 347 }, … ×300 ]</div>
+    </div>
+    <div class="track">
+      <svg class="char harvester harv-go" viewBox="0 0 230 170"><use href="#harvester"/></svg>
+      <div class="rows">
+        <i style="--h:.4; animation-delay:3.4s"></i><i style="--h:.7; animation-delay:3.5s"></i><i style="--h:.5; animation-delay:3.6s"></i><i style="--h:.9; animation-delay:3.7s"></i><i style="--h:.6; animation-delay:3.8s"></i><i style="--h:.8; animation-delay:3.9s"></i><i style="--h:.45; animation-delay:4s"></i><i style="--h:1; animation-delay:4.1s"></i><i style="--h:.65; animation-delay:4.2s"></i><i style="--h:.85; animation-delay:4.3s"></i><i style="--h:.55; animation-delay:4.4s"></i><i style="--h:.75; animation-delay:4.5s"></i><i style="--h:.5; animation-delay:4.6s"></i><i style="--h:.9; animation-delay:4.7s"></i><i style="--h:.6; animation-delay:4.8s"></i><i style="--h:.8; animation-delay:4.9s"></i><i style="--h:.7; animation-delay:5s"></i><i style="--h:.95; animation-delay:5.1s"></i>
+      </div>
+    </div>
+    <p class="bold in-up d6">Three URLs in. Three hundred rows out. <em>Three minutes.</em></p>
   </section>
 
   <!-- 6 · WHAT HELD -->
-  <section class="scene s6" data-say="So, what did the web say about my idea? Half of it held. Two hundred and ten negative App Store reviews, classified by a regex file anyone can rerun — not vibes, rows. Fifty-two percent paywall fatigue. Seventeen lost simplicity. Sixteen choice overload. And the Google Play reviews, from a completely different API, land on the same shape. From Headspace, twelve days ago: 'I want a calming app to be calming.' The founder is thrilled. The web says: half.">
-    <p class="eyebrow in-up">what held · 210 negative app store reviews, computed by engine/src/clusters.js</p>
+  <section class="scene s6" data-say="So what did the web say? Half of it held. Two hundred and ten negative App Store reviews, computed — not vibes: fifty-two percent paywall fatigue, seventeen lost simplicity, sixteen choice overload. Headspace, twelve days ago: &quot;I want a calming app to be calming.&quot; The Founder is thrilled. The web says: half.">
+    <p class="eyebrow in-up">what held · 210 negative app store reviews · computed by engine/src/clusters.js</p>
     <div class="bars">
       <div class="l in-left">Paywall fatigue</div><div class="b" style="--w:.52"></div><div class="n fade d2">52%</div>
       <div class="l in-left d1">Lost simplicity</div><div class="b" style="--w:.17; animation-delay:.4s"></div><div class="n fade d2">17%</div>
@@ -392,7 +450,7 @@ people_also_ask · related</div>
   </section>
 
   <!-- 7 · WHAT PUSHED BACK -->
-  <section class="scene s7" data-say="And then the web did its job. The interrupt already exists: Mindfulness Bell, Chill, Plum Village — all ringing. The minute already exists: One-Moment Meditation holds the top two results for 'one minute meditation reminder app', and it is — stamp — a registered trademark. The founder deflates. I cannot position Moment as a reminder app. But the gap bag found the number-one result on r/selfimprovement: 'How to remember my set intention for the day? 23 minutes later I'm in the thick of…' Nobody in a hundred results does that. The bell is taken. The minute is taken. The intention is not. A wrong positioning and a trademark collision, caught for a few dollars. That slide paid for the evening.">
+  <section class="scene s7" data-say="The competition bag came back ringing: Mindfulness Bell, Chill, Plum Village. And the minute already exists — One-Moment Meditation holds the top two results, and it is — — a registered trademark. That&#x27;s me. But the gap bag found the number-one result on r/selfimprovement: &quot;How to remember my set intention for the day? 23 minutes later I&#x27;m in the thick of…&quot; The bell is taken. The minute is taken. The intention is not.">
     <p class="eyebrow in-up">what pushed back · the competition bag did its job</p>
     <div class="bells">
       <div class="bell in-up"><svg viewBox="0 0 100 100"><use href="#bell"/></svg>Mindfulness Bell</div>
@@ -410,26 +468,27 @@ people_also_ask · related</div>
   </section>
 
   <!-- 8 · YOUR TURN -->
-  <section class="scene s8" data-say="Now yours. Someone give me a hypothesis about your product — one sentence — and the subreddit where your users complain. Four calls go out in parallel. Thirty seconds. The web will argue with you, in public, and I'll read the pushback out loud. First pass — the full run takes four minutes.">
+  <section class="scene s8" data-say="Now yours. One sentence about your product, and the subreddit where your users complain. [Take one. Repeat it back. Switch to the terminal and run it.] Four POST /request calls to the SERP zone, in parallel. Google just captcha&#x27;d the zone — Bright Data says so in the headers and locks the query for fifteen seconds; the code retries with a fresh key. [Read the refute #1 title, the competition #1, then the verdict line.] First pass. The web just argued with your idea in thirty seconds.">
     <p class="eyebrow in-up">live · your idea, argued with in public</p>
     <h2 class="big in-up d1">Give me <em>your</em> hypothesis.</h2>
     <div class="cmd in-up d2"><span class="p">$</span> node src/provemewrong.js <span class="k">--quick</span> "<span class="p">&lt;your hypothesis, one sentence&gt;</span>" <span class="k">--community</span> reddit.com/r/<span class="p">&lt;where they complain&gt;</span></div>
+    <div class="under in-up d3">under the hood · <b>4 × POST /request</b> { zone: serp_api1, url: google.com/search?q=…&amp;brd_json=1 } in parallel · gap · site:community · refute · competition<br>if google captchas the zone → <b>x-brd-error-code: captcha</b> · that query is locked for 15 s → retry with a fresh key · first pass — the full run takes four minutes</div>
     <svg class="char web hover in-right d3" viewBox="0 0 360 175"><use href="#web"/></svg>
     <div class="say web flip up pop d4 say-w">go on. I've got all day.</div>
     <p class="bold in-up d4">Your idea. Four calls. <em>Thirty seconds.</em></p>
   </section>
 
   <!-- 9 · THE RECIPE -->
-  <section class="scene s9" data-say="Do this to your own idea tonight. Two sentences of hypothesis. A third of the queries written to refute you. Each API for its job — SERP for the search, Scraper for the rows, Unlocker for the page. And keep it honest: verbatim quotes, computed numbers, credit the path that served — including the doors that stayed shut. The web is the honest friend you didn't ask for. Repo's public. Thank you.">
+  <section class="scene s9" data-say="Do this to your own idea tonight. Two sentences, a third of the queries written to refute you. One endpoint, three zones: SERP for the search, Unlocker for the page, Scraper for the rows. Keep it honest — verbatim quotes, computed numbers, read the headers. The web is the honest friend you didn&#x27;t ask for. Ask it first. Thank you.">
     <p class="eyebrow in-up">the recipe · do this to your own idea tonight</p>
     <div class="steps">
       <div class="step in-up"><h4>1 · Two sentences</h4><p>of hypothesis — and the queries that would kill it. A third of them written to refute you.</p></div>
-      <div class="step in-up d1"><h4>2 · Three APIs, each for its job</h4><p>SERP with <code>brd_json=1</code> · <code>site:</code> your community · Web Scraper for the rows · Unlocker for the page.</p></div>
-      <div class="step in-up d2"><h4>3 · Keep it honest</h4><p>Verbatim quotes. Computed numbers. Credit the path that served — including the doors that stayed shut.</p></div>
+      <div class="step in-up d1"><h4>2 · One endpoint, three zones</h4><p><code>POST /request</code> · SERP zone with <code>brd_json=1</code> for search and <code>site:</code> your community · Unlocker for the page · <code>/datasets/v3</code> for the rows.</p></div>
+      <div class="step in-up d2"><h4>3 · Keep it honest</h4><p>Verbatim quotes. Computed numbers. Read <code>x-brd-status-code</code>. Credit the path that served — including the doors that stayed shut.</p></div>
     </div>
-    <div class="links in-up d3">github.com/kewinzaq1/first-breath · moment.szlezingier.com · bright data serp api · web scraper api · web unlocker · claude</div>
-    <svg class="char founder breathe in-left d3" viewBox="0 0 200 190" style="position:absolute; left:22%; bottom:14vh;"><use href="#founder"/></svg>
-    <svg class="char web hover in-right d3" viewBox="0 0 360 175" style="position:absolute; right:18%; bottom:13vh; width:clamp(160px,20vw,300px);"><use href="#web"/></svg>
+    <div class="links in-up d3">github.com/kewinzaq1/first-breath · moment.szlezingier.com · bright data serp api · web unlocker · web scraper api · claude</div>
+    <svg class="char founder breathe in-left d3" viewBox="0 0 200 190"><use href="#founder"/></svg>
+    <svg class="char web hover in-right d3" viewBox="0 0 360 175"><use href="#web"/></svg>
     <div class="say web flip pop d4" style="position:absolute; right:16%; bottom:40vh;">the honest friend you didn't ask for.</div>
     <p class="bold in-up d5">The web already knows. <em>Ask it first.</em></p>
   </section>
