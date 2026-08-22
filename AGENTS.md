@@ -55,6 +55,7 @@ engine/src/ask.js        One SERP call, printed for a room. `node src/ask.js "<q
 engine/src/play.js       Google Play reviews via Web Scraper API (`--snapshot <id>` resume, `--unlocker` fallback) → out/play-reviews.json.
 engine/src/clusters.js   THE cluster method (regexes) — `node src/clusters.js` reproduces the page percentages.
 engine/src/verify.js     Integrity gate: quotes verbatim · clusters computed · page blob identical · counts match. Run before republish.
+docs/show/index.html     THE DEMO: a 9-scene animated show (keyboard-driven, on-screen clock, `n` = notes). Script in docs/SHOW.md. Published as its own artifact (see README). Quotes/numbers verbatim from research.json.
 docs/CHECKLIST.md        Pre-stage list. docs/stage/ = offline pack (slide PNGs, deck.pdf, ask-output.png, page scenes).
 docs/TALK.md             The 5-minute talk (API-centric: Bright Data is the subject, Moment the example).
 engine/out/research.json The analyzed result currently live on the page (committed? no — out/ is

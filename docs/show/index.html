@@ -1,0 +1,483 @@
+<title>Prove Me Wrong · The Show</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Karla:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  /* ---------- the stage (single-theme dark world, same system as the verdict page) ---------- */
+  :root {
+    --ground: #0C0A08; --ground-deep: #070605; --surface: #161210;
+    --ink: #EDE4D7; --muted: #93867A; --faint: #4A423A;
+    --ember: #D9954A; --ember-hi: #F0B269; --ember-dim: #8A5F30;
+    --data: #6E9BD1; --data-hi: #A9C6EA; --data-dim: #3D5573;
+    --display: "Fraunces", Georgia, "Times New Roman", serif;
+    --body: "Karla", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { background: var(--ground); color: var(--ink); font-family: var(--body); font-weight: 300; overflow: hidden; }
+
+  .stage { position: fixed; inset: 0; }
+  .scene { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 5vh 6vw 14vh; text-align: center; }
+  .scene.active { display: flex; }
+
+  .eyebrow { font-family: var(--mono); font-size: clamp(.7rem, 1vw, .9rem); letter-spacing: .24em; text-transform: uppercase; color: var(--data); }
+  .big { font-family: var(--display); font-weight: 300; font-size: clamp(2.4rem, 6.2vw, 6rem); line-height: 1.05; text-wrap: balance; max-width: 18ch; }
+  .big em { font-style: italic; color: var(--ember); }
+  .big .blue { color: var(--data); font-style: normal; }
+
+  /* the bold statement — one per scene, bottom of the stage */
+  .bold { position: absolute; left: 6vw; right: 6vw; bottom: 6vh; font-family: var(--display); font-size: clamp(1.3rem, 2.6vw, 2.4rem); line-height: 1.25; color: var(--ink); text-wrap: balance; }
+  .bold em { color: var(--ember); font-style: italic; }
+  .bold b { color: var(--data); font-weight: 500; }
+
+  /* speech bubbles */
+  .say { position: absolute; background: var(--surface); border: 1px solid #2A2116; border-radius: 1.2rem; padding: .7rem 1.1rem; font-family: var(--display); font-style: italic; font-size: clamp(1rem, 1.7vw, 1.5rem); color: var(--ink); max-width: 22ch; text-wrap: balance; line-height: 1.3; }
+  .say::after { content: ""; position: absolute; width: 14px; height: 14px; background: var(--surface); border-right: 1px solid #2A2116; border-bottom: 1px solid #2A2116; transform: rotate(45deg); bottom: -8px; left: 26px; }
+  .say.web { border-color: var(--data-dim); color: var(--data-hi); font-family: var(--mono); font-style: normal; font-size: clamp(.85rem, 1.35vw, 1.2rem); }
+  .say.web::after { border-color: var(--data-dim); }
+  .say.flip::after { left: auto; right: 26px; }
+  .say.up::after { bottom: auto; top: -8px; transform: rotate(-135deg); }
+
+  /* ---------- characters (inline SVG, CSS-animated) ---------- */
+  .cast { position: relative; width: min(92vw, 1400px); height: 58vh; }
+  .char { position: absolute; }
+  svg.founder { width: clamp(140px, 18vw, 260px); }
+  svg.web { width: clamp(200px, 28vw, 420px); }
+  svg.owl { width: clamp(110px, 13vw, 190px); }
+  svg.bouncer { width: clamp(100px, 11vw, 170px); }
+  svg.harvester { width: clamp(150px, 18vw, 260px); }
+  svg.bot { width: clamp(90px, 10vw, 150px); }
+
+  /* idle life */
+  .breathe { animation: breathe 4s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes breathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.02); } }
+  .blink { animation: blink 4.6s infinite; transform-origin: center; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.08); } }
+  .flap { animation: flap .5s ease-in-out infinite alternate; transform-origin: 50% 40%; }
+  @keyframes flap { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+  .spin { animation: spin 1.2s linear infinite; transform-origin: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .glow { animation: glow 2.4s ease-in-out infinite; }
+  @keyframes glow { 0%,100% { filter: drop-shadow(0 0 6px rgba(240,178,105,.35)); } 50% { filter: drop-shadow(0 0 26px rgba(240,178,105,.85)); } }
+  .hover { animation: hover 3.2s ease-in-out infinite; }
+  @keyframes hover { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+  /* scene-scoped entrances — only run while the scene is active, so every visit replays them */
+  .scene.active .in-left  { animation: inLeft .9s cubic-bezier(.2,.7,.2,1) both; }
+  .scene.active .in-right { animation: inRight .9s cubic-bezier(.2,.7,.2,1) both; }
+  .scene.active .in-up    { animation: inUp .8s cubic-bezier(.2,.7,.2,1) both; }
+  .scene.active .pop      { animation: pop .5s cubic-bezier(.2,1.4,.4,1) both; }
+  .scene.active .fade     { animation: fade .8s ease both; }
+  @keyframes inLeft  { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
+  @keyframes inRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: none; } }
+  @keyframes inUp    { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+  @keyframes pop     { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+  @keyframes fade    { from { opacity: 0; } to { opacity: 1; } }
+  .d1 { animation-delay: .5s !important; } .d2 { animation-delay: 1.2s !important; } .d3 { animation-delay: 2s !important; }
+  .d4 { animation-delay: 2.8s !important; } .d5 { animation-delay: 3.6s !important; } .d6 { animation-delay: 4.6s !important; } .d7 { animation-delay: 5.6s !important; }
+
+  /* ---------- scene specifics ---------- */
+  /* 1 · title */
+  .s1 .big { margin-top: 1.5vh; }
+  .s1 svg.founder { left: 50%; top: 0; transform: translateX(-50%); }
+  .s1 .cast { height: 34vh; }
+
+  /* 2 · the disease */
+  .s2 svg.founder { left: 18%; bottom: 8%; }
+  .s2 svg.web { right: 6%; top: 4%; }
+  .s2 .say-f { left: 12%; top: 6%; }
+  .s2 .say-w { right: 4%; bottom: 16%; }
+  .scene.active .s2-ears { animation: ears .6s ease 3.2s both; }
+  @keyframes ears { from { transform: translate(0,0); } to { transform: translate(0,-18px); } }
+
+  /* 3 · hypothesis.json */
+  .code { font-family: var(--mono); font-size: clamp(.8rem, 1.35vw, 1.25rem); line-height: 1.55; color: var(--ink); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .6rem; padding: 1.2rem 1.6rem; text-align: left; white-space: pre; overflow: hidden; max-width: 92vw; }
+  .code .k { color: var(--data); } .code .s { color: var(--ember-hi); } .code .c { color: var(--faint); }
+  .s3 svg.founder { right: 4%; bottom: 2%; }
+  .s3 .say-f { right: 4%; top: 6%; }
+  .typed { display: inline-block; overflow: hidden; white-space: pre; vertical-align: bottom; }
+
+  /* 4 · the three couriers */
+  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; width: min(94vw, 1500px); height: 60vh; }
+  .lane { position: relative; border: 1px solid #1E2732; background: linear-gradient(180deg, rgba(22,18,16,.6), rgba(7,6,5,.2)); border-radius: .8rem; padding: 1rem; overflow: hidden; }
+  .lane h3 { font-family: var(--mono); font-size: clamp(.7rem, 1vw, .9rem); letter-spacing: .2em; text-transform: uppercase; color: var(--data); text-align: left; }
+  .lane .tag { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; font-family: var(--mono); font-size: clamp(.75rem, 1.1vw, 1rem); color: var(--ember); text-align: left; line-height: 1.5; }
+  .lane .tag small { display: block; color: var(--muted); }
+  .lane .char { left: 50%; top: 34%; transform: translate(-50%, -50%); }
+  .scene.active .owl-go { animation: owlGo 3.2s ease-in-out 1 both; }
+  @keyframes owlGo { 0% { transform: translate(-50%,-50%) ; } 35% { transform: translate(120%,-90%) rotate(8deg); } 60% { transform: translate(120%,-90%) rotate(-4deg); } 100% { transform: translate(-50%,-50%); } }
+  .scroll { position: absolute; left: 50%; top: 60%; transform: translateX(-50%); width: 86%; font-family: var(--mono); font-size: clamp(.65rem, .95vw, .9rem); color: var(--data-hi); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .4rem; padding: .5rem .8rem; white-space: pre-wrap; text-align: left; line-height: 1.4; }
+  .doors { position: absolute; left: 8%; right: 8%; top: 10%; display: flex; justify-content: space-between; }
+  .door { width: 26%; aspect-ratio: 3 / 4; perspective: 600px; position: relative; }
+  .door .frame { position: absolute; inset: 0; border: 2px solid var(--faint); border-radius: .4rem .4rem 0 0; background: var(--ground-deep); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(.6rem, .9vw, .85rem); color: var(--muted); text-align: center; padding: .3rem; }
+  .door .leaf { position: absolute; inset: 0; background: var(--surface); border: 2px solid var(--ember-dim); border-radius: .4rem .4rem 0 0; transform-origin: left; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .5rem; font-family: var(--mono); font-size: clamp(.6rem, .9vw, .85rem); color: var(--ink); }
+  .scene.active .door.open .leaf { animation: doorOpen 1s ease 1 both; }
+  @keyframes doorOpen { to { transform: rotateY(-105deg); } }
+  .scene.active .door.shut .leaf { animation: doorShake .5s ease 2 both; }
+  @keyframes doorShake { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-6px); } }
+  .door .sign { position: absolute; top: -1.6rem; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: clamp(.55rem, .8vw, .8rem); color: var(--ember); white-space: nowrap; }
+  .scene.active .harv-go { animation: harvGo 3.6s ease-in-out 1 both; top: 44%; }
+  @keyframes harvGo { 0% { transform: translate(-190%,-50%); } 100% { transform: translate(-50%,-50%); } }
+  .rows { position: absolute; left: 10%; right: 10%; top: 66%; display: flex; gap: 3px; align-items: flex-end; height: 18%; }
+  .rows i { flex: 1; background: var(--data); opacity: 0; height: 100%; transform-origin: bottom; }
+  .scene.active .rows i { animation: rowUp .3s ease both; }
+  @keyframes rowUp { from { opacity: 0; transform: scaleY(0); } to { opacity: .85; transform: scaleY(var(--h, 1)); } }
+  .apps { position: absolute; left: 12%; right: 12%; top: 16%; display: flex; justify-content: space-between; }
+  .app { width: 22%; aspect-ratio: 1; border-radius: 22%; background: var(--surface); border: 1px solid #2A2116; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(.6rem, .9vw, .85rem); color: var(--muted); }
+
+  /* 5 · the pattern */
+  .bags { display: flex; gap: 2vw; align-items: flex-end; }
+  .bag { width: clamp(160px, 24vw, 380px); background: var(--surface); border: 1px solid #2A2116; border-radius: .8rem; padding: 1rem; text-align: left; }
+  .bag h4 { font-family: var(--mono); font-size: clamp(.7rem, 1vw, .9rem); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+  .bag.hurt { border-color: var(--ember-dim); } .bag.hurt h4 { color: var(--ember); }
+  .bag p { font-family: var(--display); font-style: italic; font-size: clamp(.9rem, 1.4vw, 1.3rem); line-height: 1.35; color: var(--ink); }
+  .bag p.q { color: var(--data-hi); }
+  .s5 svg.founder { left: 3%; bottom: 4%; } .s5 svg.owl { right: 4%; top: 2%; }
+  .s5 .say-f { left: 2%; top: 4%; } .s5 .say-o { right: 2%; bottom: 18%; }
+
+  /* 6 · what held */
+  .bars { display: grid; grid-template-columns: max-content 1fr max-content; gap: .8rem 1.2rem; align-items: center; width: min(88vw, 1100px); }
+  .bars .l { font-family: var(--display); font-size: clamp(1rem, 1.8vw, 1.6rem); text-align: right; }
+  .bars .b { height: clamp(18px, 3vh, 34px); background: var(--ember); transform-origin: left; }
+  .scene.active .bars .b { animation: grow 1.2s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(var(--w)); } }
+  .bars .n { font-family: var(--mono); font-size: clamp(1.2rem, 2.4vw, 2.2rem); color: var(--ember); font-variant-numeric: tabular-nums; }
+  .quotes { display: flex; gap: 2vw; margin-top: 3vh; width: min(92vw, 1300px); }
+  .quote { flex: 1; font-family: var(--display); font-style: italic; font-size: clamp(.95rem, 1.5vw, 1.35rem); line-height: 1.4; color: var(--data-hi); background: var(--surface); border: 1px solid var(--data-dim); border-radius: 1rem; padding: 1rem 1.2rem; text-align: left; }
+  .quote small { display: block; margin-top: .5rem; font-family: var(--mono); font-style: normal; font-size: clamp(.6rem, .85vw, .8rem); letter-spacing: .12em; text-transform: uppercase; color: var(--data-dim); }
+  .s6 .say-f { left: 2%; top: 2%; } .s6 .say-w { right: 2%; top: 2%; }
+
+  /* 7 · what pushed back */
+  .bells { display: flex; gap: 3vw; align-items: flex-end; justify-content: center; }
+  .bell { width: clamp(90px, 12vw, 170px); text-align: center; font-family: var(--mono); font-size: clamp(.65rem, .95vw, .9rem); color: var(--muted); }
+  .bell svg { width: 100%; transform-origin: 50% 8%; }
+  .scene.active .bell svg { animation: ring 1.2s ease-in-out 3 both; }
+  @keyframes ring { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-18deg); } 75% { transform: rotate(18deg); } }
+  .bell .r { color: var(--ember); font-weight: 600; }
+  .stamp { display: inline-block; border: 3px solid var(--ember); color: var(--ember); font-family: var(--mono); font-weight: 500; letter-spacing: .2em; padding: .2rem .6rem; transform: rotate(-10deg); font-size: clamp(.8rem, 1.3vw, 1.2rem); }
+  .scene.active .stamp { animation: stamp .4s cubic-bezier(.2,1.6,.4,1) 3.6s both; }
+  @keyframes stamp { from { opacity: 0; transform: rotate(-10deg) scale(3); } to { opacity: 1; transform: rotate(-10deg) scale(1); } }
+  .scene.active .deflate { animation: deflate 1.4s ease 4.2s both; transform-origin: 50% 100%; }
+  @keyframes deflate { to { transform: scale(.72) translateY(10%); } }
+  .unclaimed { margin-top: 2vh; max-width: min(90vw, 900px); background: var(--ground-deep); border: 1px solid var(--ember-dim); border-radius: 1rem; padding: 1.2rem 1.6rem; text-align: left; }
+  .unclaimed .t { font-family: var(--display); font-size: clamp(1.1rem, 2vw, 1.8rem); color: var(--ink); }
+  .unclaimed .q { font-family: var(--display); font-style: italic; color: var(--data-hi); font-size: clamp(.95rem, 1.5vw, 1.3rem); margin-top: .3rem; }
+  .unclaimed small { display: block; margin-top: .4rem; font-family: var(--mono); font-size: clamp(.6rem, .85vw, .8rem); letter-spacing: .12em; text-transform: uppercase; color: var(--data-dim); }
+  .s7 svg.founder { position: absolute; left: 3%; bottom: 16vh; }
+
+  /* 8 · your turn */
+  .cmd { font-family: var(--mono); font-size: clamp(.9rem, 1.6vw, 1.5rem); color: var(--ink); background: var(--surface); border: 1px solid var(--data-dim); border-radius: .6rem; padding: 1rem 1.4rem; text-align: left; max-width: 92vw; white-space: pre-wrap; line-height: 1.5; }
+  .cmd .p { color: var(--ember); } .cmd .k { color: var(--data); }
+  .s8 svg.web { position: absolute; right: 3%; top: 6%; }
+  .s8 .say-w { right: 2%; top: 40%; }
+
+  /* 9 · close */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; width: min(92vw, 1300px); margin-top: 2vh; }
+  .step { background: var(--surface); border: 1px solid #2A2116; border-radius: .8rem; padding: 1.2rem; text-align: left; }
+  .step h4 { font-family: var(--display); font-size: clamp(1rem, 1.7vw, 1.5rem); color: var(--ember); }
+  .step p { margin-top: .4rem; color: var(--muted); font-size: clamp(.85rem, 1.2vw, 1.1rem); line-height: 1.4; }
+  .links { margin-top: 2vh; font-family: var(--mono); font-size: clamp(.65rem, .95vw, .9rem); letter-spacing: .12em; color: var(--faint); }
+  .s9 svg.founder, .s9 svg.web { position: absolute; bottom: 0; }
+  .s9 svg.founder { left: 24%; } .s9 svg.web { right: 20%; }
+
+  /* ---------- chrome: progress, timer, notes ---------- */
+  .dots { position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+  .dots i.on { background: var(--ember); }
+  .timer { position: fixed; top: 2vh; right: 2vw; font-family: var(--mono); font-size: clamp(.8rem, 1.2vw, 1.1rem); color: var(--faint); font-variant-numeric: tabular-nums; }
+  .timer.warn { color: var(--ember); } .timer.over { color: #E0664A; }
+  .notes { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(7,6,5,.94); border-top: 1px solid var(--data-dim); color: var(--ink); font-family: var(--body); font-size: clamp(.9rem, 1.3vw, 1.2rem); padding: 1rem 4vw 1.4rem; line-height: 1.5; display: none; }
+  .notes.on { display: block; }
+  .notes b { color: var(--ember); font-weight: 600; }
+  .hint { position: fixed; bottom: 2vh; right: 2vw; font-family: var(--mono); font-size: .7rem; letter-spacing: .15em; color: var(--faint); text-transform: uppercase; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .breathe, .blink, .flap, .spin, .glow, .hover, .scene.active * { animation: none !important; }
+    .bars .b { transform: scaleX(var(--w)); } .rows i { opacity: .85; transform: scaleY(var(--h, 1)); }
+    .door.open .leaf { transform: rotateY(-105deg); } .stamp { opacity: 1; }
+  }
+  @media (max-width: 800px) {
+    .lanes { grid-template-columns: 1fr; height: auto; } .lane { height: 36vh; }
+    .steps { grid-template-columns: 1fr; } .quotes { flex-direction: column; }
+    .s2 svg.web { right: 2%; top: 0; width: 40vw; } .s2 svg.founder { left: 4%; }
+  }
+</style>
+
+<!-- ---------- SVG character library (reused via <use>) ---------- -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="emberG" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="#F0B269"/><stop offset=".55" stop-color="#D9954A"/><stop offset="1" stop-color="#6B4318"/></radialGradient>
+    <radialGradient id="dataG" cx="45%" cy="40%" r="70%"><stop offset="0" stop-color="#A9C6EA"/><stop offset=".6" stop-color="#6E9BD1"/><stop offset="1" stop-color="#2E4461"/></radialGradient>
+
+    <!-- the Founder: a proud ember blob, party hat, hugging an idea -->
+    <g id="founder">
+      <g class="glow"><path d="M100 8 l-10 22 a12 12 0 1 0 20 0 z" fill="#F0B269"/><circle cx="100" cy="30" r="13" fill="#F0B269"/><rect x="94" y="41" width="12" height="6" fill="#EDE4D7"/></g>
+      <ellipse cx="100" cy="128" rx="62" ry="58" fill="url(#emberG)"/>
+      <path d="M72 70 l28 -30 l28 30 z" fill="#6E9BD1"/><circle cx="100" cy="40" r="5" fill="#EDE4D7"/>
+      <g class="blink"><ellipse cx="80" cy="118" rx="11" ry="12" fill="#FFF6EA"/><ellipse cx="120" cy="118" rx="11" ry="12" fill="#FFF6EA"/><circle cx="83" cy="119" r="5" fill="#0C0A08"/><circle cx="123" cy="119" r="5" fill="#0C0A08"/></g>
+      <path d="M82 146 q18 16 36 0" stroke="#0C0A08" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M44 132 q-14 -18 4 -32" stroke="#D9954A" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <path d="M156 132 q14 -18 -4 -32" stroke="#D9954A" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <text x="100" y="178" text-anchor="middle" font-family="IBM Plex Mono, Menlo, monospace" font-size="11" fill="#0C0A08" font-weight="500">I ♥ MY IDEA</text>
+    </g>
+
+    <!-- the Web: a blue cloud with too many eyes. Honest. Unimpressed. -->
+    <g id="web">
+      <g fill="url(#dataG)">
+        <circle cx="90" cy="110" r="58"/><circle cx="160" cy="80" r="70"/><circle cx="240" cy="105" r="60"/><circle cx="300" cy="125" r="44"/>
+        <rect x="60" y="110" width="270" height="60" rx="30"/>
+      </g>
+      <g class="blink">
+        <g><ellipse cx="110" cy="100" rx="14" ry="16" fill="#FFF6EA"/><circle cx="113" cy="102" r="6" fill="#0C0A08"/></g>
+        <g><ellipse cx="165" cy="72" rx="12" ry="14" fill="#FFF6EA"/><circle cx="167" cy="74" r="5" fill="#0C0A08"/></g>
+        <g><ellipse cx="230" cy="96" rx="15" ry="17" fill="#FFF6EA"/><circle cx="233" cy="98" r="6" fill="#0C0A08"/></g>
+        <g><ellipse cx="290" cy="118" rx="10" ry="12" fill="#FFF6EA"/><circle cx="292" cy="120" r="4" fill="#0C0A08"/></g>
+        <g><ellipse cx="70" cy="132" rx="9" ry="10" fill="#FFF6EA"/><circle cx="72" cy="133" r="4" fill="#0C0A08"/></g>
+      </g>
+      <path d="M150 140 h70" stroke="#0C0A08" stroke-width="5" stroke-linecap="round"/>
+      <text x="195" y="163" text-anchor="middle" font-family="IBM Plex Mono, Menlo, monospace" font-size="11" fill="#0C0A08">source: literally everyone</text>
+    </g>
+
+    <!-- SERP owl: glasses, wings, reads Google so you don't have to -->
+    <g id="owl">
+      <g class="flap"><ellipse cx="40" cy="90" rx="22" ry="40" fill="#3D5573"/></g>
+      <g class="flap" style="animation-direction: alternate-reverse"><ellipse cx="130" cy="90" rx="22" ry="40" fill="#3D5573"/></g>
+      <ellipse cx="85" cy="95" rx="50" ry="58" fill="url(#dataG)"/>
+      <circle cx="65" cy="80" r="20" fill="none" stroke="#EDE4D7" stroke-width="4"/><circle cx="105" cy="80" r="20" fill="none" stroke="#EDE4D7" stroke-width="4"/><path d="M85 80 h0" stroke="#EDE4D7" stroke-width="4"/>
+      <g class="blink"><circle cx="65" cy="80" r="12" fill="#FFF6EA"/><circle cx="105" cy="80" r="12" fill="#FFF6EA"/><circle cx="68" cy="82" r="5" fill="#0C0A08"/><circle cx="108" cy="82" r="5" fill="#0C0A08"/></g>
+      <path d="M85 98 l-8 12 h16 z" fill="#D9954A"/>
+      <text x="85" y="150" text-anchor="middle" font-family="IBM Plex Mono, Menlo, monospace" font-size="12" fill="#6E9BD1">SERP API</text>
+    </g>
+
+    <!-- Unlocker bouncer: sunglasses, keyring, a notebook for the refusals -->
+    <g id="bouncer">
+      <rect x="35" y="60" width="100" height="96" rx="22" fill="url(#dataG)"/>
+      <circle cx="85" cy="44" r="26" fill="#6E9BD1"/>
+      <rect x="60" y="36" width="22" height="12" rx="4" fill="#0C0A08"/><rect x="88" y="36" width="22" height="12" rx="4" fill="#0C0A08"/><path d="M82 42 h6" stroke="#0C0A08" stroke-width="3"/>
+      <path d="M76 58 h18" stroke="#0C0A08" stroke-width="3" stroke-linecap="round"/>
+      <g class="spin" style="transform-origin: 140px 110px"><circle cx="140" cy="110" r="12" fill="none" stroke="#EDE4D7" stroke-width="4"/><rect x="150" y="106" width="16" height="6" fill="#EDE4D7"/><rect x="160" y="112" width="4" height="6" fill="#EDE4D7"/></g>
+      <rect x="16" y="96" width="22" height="30" rx="3" fill="#EDE4D7"/><path d="M20 104 h14 M20 110 h14 M20 116 h10" stroke="#93867A" stroke-width="2"/>
+      <text x="85" y="175" text-anchor="middle" font-family="IBM Plex Mono, Menlo, monospace" font-size="12" fill="#6E9BD1">WEB UNLOCKER</text>
+    </g>
+
+    <!-- Scraper harvester: a tidy robot that turns app stores into rows -->
+    <g id="harvester">
+      <rect x="30" y="50" width="170" height="70" rx="16" fill="url(#dataG)"/>
+      <rect x="40" y="30" width="70" height="30" rx="8" fill="#3D5573"/>
+      <g class="blink"><circle cx="60" cy="45" r="7" fill="#FFF6EA"/><circle cx="90" cy="45" r="7" fill="#FFF6EA"/><circle cx="62" cy="46" r="3" fill="#0C0A08"/><circle cx="92" cy="46" r="3" fill="#0C0A08"/></g>
+      <g class="spin" style="transform-origin: 60px 124px"><circle cx="60" cy="124" r="16" fill="#161210" stroke="#EDE4D7" stroke-width="4"/><path d="M60 110 v28 M46 124 h28" stroke="#EDE4D7" stroke-width="3"/></g>
+      <g class="spin" style="transform-origin: 170px 124px"><circle cx="170" cy="124" r="16" fill="#161210" stroke="#EDE4D7" stroke-width="4"/><path d="M170 110 v28 M156 124 h28" stroke="#EDE4D7" stroke-width="3"/></g>
+      <path d="M200 70 l26 -14 v30 z" fill="#D9954A"/>
+      <text x="115" y="160" text-anchor="middle" font-family="IBM Plex Mono, Menlo, monospace" font-size="12" fill="#6E9BD1">WEB SCRAPER API</text>
+    </g>
+
+    <!-- the analyst bot: a coding agent with a magnifying glass. Does not do vibes. -->
+    <g id="bot">
+      <rect x="30" y="40" width="80" height="70" rx="14" fill="#161210" stroke="#6E9BD1" stroke-width="3"/>
+      <rect x="66" y="22" width="8" height="18" fill="#6E9BD1"/><circle cx="70" cy="20" r="6" fill="#D9954A"/>
+      <g class="blink"><rect x="46" y="62" width="16" height="10" rx="3" fill="#A9C6EA"/><rect x="78" y="62" width="16" height="10" rx="3" fill="#A9C6EA"/></g>
+      <path d="M52 90 h36" stroke="#A9C6EA" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="124" cy="74" r="14" fill="none" stroke="#EDE4D7" stroke-width="4"/><path d="M134 84 l14 14" stroke="#EDE4D7" stroke-width="5" stroke-linecap="round"/>
+    </g>
+
+    <!-- a bell -->
+    <g id="bell"><path d="M50 10 c-22 0 -30 20 -30 44 v18 l-10 12 h80 l-10 -12 v-18 c0 -24 -8 -44 -30 -44 z" fill="url(#dataG)"/><circle cx="50" cy="92" r="7" fill="#D9954A"/><circle cx="50" cy="8" r="5" fill="#A9C6EA"/></g>
+  </defs>
+</svg>
+
+<div class="stage" id="stage">
+
+  <!-- 1 · TITLE -->
+  <section class="scene s1 active" data-say="Every founder in this room has shipped a positioning the web could have refuted for five dollars. We don't check. We're scared of the answer. So I built the thing that asks. This is Prove Me Wrong, and the only moving part is Bright Data.">
+    <p class="eyebrow in-up">a bright data hypothesis-breaker · aug 22, 2026</p>
+    <div class="cast">
+      <svg class="char founder breathe pop d1" viewBox="0 0 200 190"><use href="#founder"/></svg>
+    </div>
+    <h1 class="big in-up d2">Prove <em>Me</em> Wrong</h1>
+    <p class="bold in-up d3">Every founder in this room has shipped a positioning the web could have refuted for <em>five dollars.</em></p>
+  </section>
+
+  <!-- 2 · THE DISEASE -->
+  <section class="scene s2" data-say="Meet the founder. Any resemblance to the speaker is purely intentional. He has an idea, he loves it, and he has never once asked anyone who might disagree. That's the disease: we ship first and find out later — from a tweet. The web knew. The web always knew. We just never asked it the uncomfortable question.">
+    <p class="eyebrow in-up">the problem · a love story</p>
+    <div class="cast">
+      <svg class="char founder breathe in-left" viewBox="0 0 200 190"><use href="#founder"/></svg>
+      <div class="say pop d1 say-f">Users are going to <b>LOVE</b> this.</div>
+      <svg class="char web hover in-right d2" viewBox="0 0 360 175"><use href="#web"/></svg>
+      <div class="say web flip up pop d3 say-w">will they, though?</div>
+    </div>
+    <p class="bold in-up d4">We never check. <em>We're afraid of the answer.</em></p>
+  </section>
+
+  <!-- 3 · GIVE IT YOUR IDEA -->
+  <section class="scene s3" data-say="So here's the deal. You give it what you believe — two sentences, no more. The community where your users tell the truth. And the competitors you're secretly scared of. That's the whole input. Mine was Moment, a meditation app. I believed the apps overwhelm people, and that the calm never leaves the session. Confident. Unverified. Perfect test subject.">
+    <p class="eyebrow in-up">step one · give it your idea</p>
+    <div class="code in-up d1"><span class="c">// engine/hypothesis.json</span>
+{ <span class="k">"product"</span>: <span class="s">"Moment"</span>,
+  <span class="k">"hypotheses"</span>: {
+    <span class="k">"H1"</span>: <span class="s">"Meditation apps overwhelm people with content and choice."</span>,
+    <span class="k">"H2"</span>: <span class="s">"The calm stays in the session: people are still reactive in real life."</span> },
+  <span class="k">"community"</span>:   [<span class="s">"reddit.com/r/Meditation"</span>, <span class="s">"reddit.com/r/selfimprovement"</span>],
+  <span class="k">"competitors"</span>: [<span class="s">"Calm"</span>, <span class="s">"Headspace"</span>, <span class="s">"Waking Up"</span>] }</div>
+    <svg class="char founder breathe in-right d2" viewBox="0 0 200 190" style="position:absolute; right:4%; bottom:14vh;"><use href="#founder"/></svg>
+    <div class="say pop d3" style="position:absolute; right:4%; top:10vh;">Two sentences? I have a <b>deck.</b></div>
+    <p class="bold in-up d3">Two sentences. One community. <em>The people you're scared of.</em></p>
+  </section>
+
+  <!-- 4 · THE THREE COURIERS -->
+  <section class="scene s4" data-say="Then three couriers go out. The SERP API — the owl — reads Google so I don't have to: rank, title, link, snippet, already parsed. Zero HTML in my life. The Web Unlocker is the bouncer: he opens doors. Google Play? Open, 1.2 megabytes. Apple? Door opens, nobody home — 200 OK, empty body. Reddit? Not on the list without KYC. He writes every refusal down — that's the point. And the Web Scraper API is the harvester: three app-store URLs in, three hundred structured reviews out, three minutes, zero errors.">
+    <p class="eyebrow in-up">step two · three bright data apis, each for what it's best at</p>
+    <div class="lanes">
+      <div class="lane in-up">
+        <h3>serp api · the owl</h3>
+        <svg class="char owl owl-go" viewBox="0 0 170 160"><use href="#owl"/></svg>
+        <div class="scroll pop d5">{ rank: 1, title, link, snippet }
+people_also_ask · related</div>
+        <div class="tag fade d6">12 queries · 92 rows · 12/12 answered<small>parsed by Bright Data · zero HTML touched</small></div>
+      </div>
+      <div class="lane in-up d1">
+        <h3>web unlocker · the bouncer</h3>
+        <div class="doors">
+          <div class="door open"><span class="sign">play.google.com</span><div class="frame">1.2 MB<br>200 OK</div><div class="leaf">PLAY</div></div>
+          <div class="door open" style="animation-delay:1s"><span class="sign">apps.apple.com</span><div class="frame">200 OK<br>nobody home</div><div class="leaf" style="animation-delay:1.2s">APPLE</div></div>
+          <div class="door shut"><span class="sign">reddit.com</span><div class="frame"></div><div class="leaf" style="animation-delay:2.4s">KYC ONLY</div></div>
+        </div>
+        <svg class="char bouncer breathe" viewBox="0 0 170 180" style="top:54%"><use href="#bouncer"/></svg>
+        <div class="tag fade d6">4/5 pages opened · refusals written down<small>"destination_ip_prohibited" goes in the file, verbatim</small></div>
+      </div>
+      <div class="lane in-up d2">
+        <h3>web scraper api · the harvester</h3>
+        <div class="apps"><div class="app">calm</div><div class="app">headspace</div><div class="app">waking up</div></div>
+        <svg class="char harvester harv-go" viewBox="0 0 230 170"><use href="#harvester"/></svg>
+        <div class="rows">
+          <i style="--h:.4; animation-delay:3.6s"></i><i style="--h:.7; animation-delay:3.7s"></i><i style="--h:.5; animation-delay:3.8s"></i><i style="--h:.9; animation-delay:3.9s"></i><i style="--h:.6; animation-delay:4s"></i><i style="--h:.8; animation-delay:4.1s"></i><i style="--h:.45; animation-delay:4.2s"></i><i style="--h:1; animation-delay:4.3s"></i><i style="--h:.65; animation-delay:4.4s"></i><i style="--h:.85; animation-delay:4.5s"></i><i style="--h:.55; animation-delay:4.6s"></i><i style="--h:.75; animation-delay:4.7s"></i>
+        </div>
+        <div class="tag fade d6">300 reviews · 179 s · 0 errors<small>trigger → poll → snapshot · dataset gd_m6zagkt024uwvvwuyu</small></div>
+      </div>
+    </div>
+    <p class="bold in-up d7">Three APIs. One Bearer token. <em>Every refusal written down.</em></p>
+  </section>
+
+  <!-- 5 · THE PATTERN -->
+  <section class="scene s5" data-say="Here's the trick that makes it research instead of marketing. The queries come in three bags. Gap — the pain, in the user's words. Competition — written to hurt. And refute — the opposite of what I believe. 'Meditation made me LESS reactive.' The founder hates this bag. Why would you search for THAT? Because you won't. If you only search for people who agree with you, the web will happily agree.">
+    <p class="eyebrow in-up">the pattern · a third of the queries are written to hurt you</p>
+    <div class="bags">
+      <div class="bag in-up"><h4>gap</h4><p class="q">"meditate every day but still reactive"</p><p class="q">"site:reddit.com/r/Meditation still reactive after years"</p></div>
+      <div class="bag hurt in-up d1"><h4>refute · the opposite</h4><p class="q">"meditation made me less reactive"</p><p class="q">"does meditation carry over into daily life"</p></div>
+      <div class="bag hurt in-up d2"><h4>competition · to hurt</h4><p class="q">"mindfulness bell app random reminders"</p><p class="q">"one minute meditation reminder app"</p></div>
+    </div>
+    <svg class="char founder breathe in-left d3" viewBox="0 0 200 190" style="position:absolute; left:3%; bottom:14vh;"><use href="#founder"/></svg>
+    <div class="say pop d4" style="position:absolute; left:3%; top:8vh;">Why would you search for <b>that?</b></div>
+    <svg class="char owl hover in-right d3" viewBox="0 0 170 160" style="position:absolute; right:4%; top:6vh;"><use href="#owl"/></svg>
+    <div class="say web flip pop d5" style="position:absolute; right:3%; top:38vh;">because you won't.</div>
+    <p class="bold in-up d6">Search only for people who agree, <em>and the web will happily agree.</em></p>
+  </section>
+
+  <!-- 6 · WHAT HELD -->
+  <section class="scene s6" data-say="So, what did the web say about my idea? Half of it held. Two hundred and ten negative App Store reviews, classified by a regex file anyone can rerun — not vibes, rows. Fifty-two percent paywall fatigue. Seventeen lost simplicity. Sixteen choice overload. And the Google Play reviews, from a completely different API, land on the same shape. From Headspace, twelve days ago: 'I want a calming app to be calming.' The founder is thrilled. The web says: half.">
+    <p class="eyebrow in-up">what held · 210 negative app store reviews, computed by engine/src/clusters.js</p>
+    <div class="bars">
+      <div class="l in-left">Paywall fatigue</div><div class="b" style="--w:.52"></div><div class="n fade d2">52%</div>
+      <div class="l in-left d1">Lost simplicity</div><div class="b" style="--w:.17; animation-delay:.4s"></div><div class="n fade d2">17%</div>
+      <div class="l in-left d2">Choice overload</div><div class="b" style="--w:.16; animation-delay:.8s"></div><div class="n fade d2">16%</div>
+    </div>
+    <div class="quotes">
+      <div class="quote in-up d3">"Some days I don't want to discover something new, I just want to return to a old favorite. … I want a calming app to be calming."<small>headspace · google play · aug 2026 · via web scraper api</small></div>
+      <div class="quote in-up d4">"meditation helps me identify when I am not being present, However, when another same trigger arose, I was still reactive."<small>r/meditation · via serp api</small></div>
+    </div>
+    <div class="say pop d5 say-f">Told you. <b>Genius.</b></div>
+    <div class="say web flip pop d6 say-w">half.</div>
+    <p class="bold in-up d6"><em>Half of it held.</em> Two stores, two APIs, one shape.</p>
+  </section>
+
+  <!-- 7 · WHAT PUSHED BACK -->
+  <section class="scene s7" data-say="And then the web did its job. The interrupt already exists: Mindfulness Bell, Chill, Plum Village — all ringing. The minute already exists: One-Moment Meditation holds the top two results for 'one minute meditation reminder app', and it is — stamp — a registered trademark. The founder deflates. I cannot position Moment as a reminder app. But the gap bag found the number-one result on r/selfimprovement: 'How to remember my set intention for the day? 23 minutes later I'm in the thick of…' Nobody in a hundred results does that. The bell is taken. The minute is taken. The intention is not. A wrong positioning and a trademark collision, caught for a few dollars. That slide paid for the evening.">
+    <p class="eyebrow in-up">what pushed back · the competition bag did its job</p>
+    <div class="bells">
+      <div class="bell in-up"><svg viewBox="0 0 100 100"><use href="#bell"/></svg>Mindfulness Bell</div>
+      <div class="bell in-up d1"><svg viewBox="0 0 100 100" style="animation-delay:.3s"><use href="#bell"/></svg>Chill</div>
+      <div class="bell in-up d2"><svg viewBox="0 0 100 100" style="animation-delay:.6s"><use href="#bell"/></svg>Plum Village</div>
+      <div class="bell in-up d3"><svg viewBox="0 0 100 100" style="animation-delay:.9s"><use href="#bell"/></svg><span class="r">One-Moment Meditation</span><br><span class="stamp">®</span><br><small>#1 and #2 for "one minute meditation reminder app"</small></div>
+    </div>
+    <div class="unclaimed in-up d5">
+      <div class="t">What no result offers: remembering <em style="color:var(--ember)">your own intention</em> at the moment it matters.</div>
+      <div class="q">"How to remember my set intention for the day?" — "My morning yoga includes setting an intention for the day… 23 minutes later I'm in the thick of…"</div>
+      <small>r/selfimprovement · #1 organic result · via serp api</small>
+    </div>
+    <svg class="char founder deflate" viewBox="0 0 200 190"><use href="#founder"/></svg>
+    <p class="bold in-up d6">The bell is taken. The minute is taken. <em>The intention is not.</em></p>
+  </section>
+
+  <!-- 8 · YOUR TURN -->
+  <section class="scene s8" data-say="Now yours. Someone give me a hypothesis about your product — one sentence — and the subreddit where your users complain. Four calls go out in parallel. Thirty seconds. The web will argue with you, in public, and I'll read the pushback out loud. First pass — the full run takes four minutes.">
+    <p class="eyebrow in-up">live · your idea, argued with in public</p>
+    <h2 class="big in-up d1">Give me <em>your</em> hypothesis.</h2>
+    <div class="cmd in-up d2"><span class="p">$</span> node src/provemewrong.js <span class="k">--quick</span> "<span class="p">&lt;your hypothesis, one sentence&gt;</span>" <span class="k">--community</span> reddit.com/r/<span class="p">&lt;where they complain&gt;</span></div>
+    <svg class="char web hover in-right d3" viewBox="0 0 360 175"><use href="#web"/></svg>
+    <div class="say web flip up pop d4 say-w">go on. I've got all day.</div>
+    <p class="bold in-up d4">Your idea. Four calls. <em>Thirty seconds.</em></p>
+  </section>
+
+  <!-- 9 · THE RECIPE -->
+  <section class="scene s9" data-say="Do this to your own idea tonight. Two sentences of hypothesis. A third of the queries written to refute you. Each API for its job — SERP for the search, Scraper for the rows, Unlocker for the page. And keep it honest: verbatim quotes, computed numbers, credit the path that served — including the doors that stayed shut. The web is the honest friend you didn't ask for. Repo's public. Thank you.">
+    <p class="eyebrow in-up">the recipe · do this to your own idea tonight</p>
+    <div class="steps">
+      <div class="step in-up"><h4>1 · Two sentences</h4><p>of hypothesis — and the queries that would kill it. A third of them written to refute you.</p></div>
+      <div class="step in-up d1"><h4>2 · Three APIs, each for its job</h4><p>SERP with <code>brd_json=1</code> · <code>site:</code> your community · Web Scraper for the rows · Unlocker for the page.</p></div>
+      <div class="step in-up d2"><h4>3 · Keep it honest</h4><p>Verbatim quotes. Computed numbers. Credit the path that served — including the doors that stayed shut.</p></div>
+    </div>
+    <div class="links in-up d3">github.com/kewinzaq1/first-breath · moment.szlezingier.com · bright data serp api · web scraper api · web unlocker · claude</div>
+    <svg class="char founder breathe in-left d3" viewBox="0 0 200 190" style="position:absolute; left:22%; bottom:14vh;"><use href="#founder"/></svg>
+    <svg class="char web hover in-right d3" viewBox="0 0 360 175" style="position:absolute; right:18%; bottom:13vh; width:clamp(160px,20vw,300px);"><use href="#web"/></svg>
+    <div class="say web flip pop d4" style="position:absolute; right:16%; bottom:40vh;">the honest friend you didn't ask for.</div>
+    <p class="bold in-up d5">The web already knows. <em>Ask it first.</em></p>
+  </section>
+
+</div>
+
+<div class="dots" id="dots" aria-hidden="true"></div>
+<div class="timer" id="timer" aria-live="off">0:00</div>
+<div class="notes" id="notes"></div>
+<div class="hint" aria-hidden="true">→ next · ← back · n notes · r reset clock</div>
+
+<script>
+  // Keyboard-driven show: → / space / click = next · ← = back · 1–9 jump · n = speaker notes · r = reset clock.
+  const scenes = [...document.querySelectorAll('.scene')];
+  const dots = document.getElementById('dots');
+  const notes = document.getElementById('notes');
+  const timerEl = document.getElementById('timer');
+  scenes.forEach(() => dots.appendChild(document.createElement('i')));
+  let i = 0, t0 = null, notesOn = false;
+
+  function show(n) {
+    i = Math.max(0, Math.min(scenes.length - 1, n));
+    scenes.forEach((s, k) => {
+      const on = k === i;
+      if (on && !s.classList.contains('active')) { s.classList.add('active'); void s.offsetWidth; } // reflow restarts the scene's animations
+      else if (!on) s.classList.remove('active');
+    });
+    [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
+    notes.innerHTML = '<b>' + (i + 1) + '/' + scenes.length + '</b> ' + scenes[i].dataset.say;
+    if (i > 0 && t0 === null) t0 = Date.now(); // the clock starts when you leave the title
+  }
+  function tick() {
+    if (t0 === null) return;
+    const s = Math.floor((Date.now() - t0) / 1000);
+    timerEl.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    timerEl.classList.toggle('warn', s >= 270 && s < 300);
+    timerEl.classList.toggle('over', s >= 300);
+  }
+  setInterval(tick, 500);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') { e.preventDefault(); show(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') { e.preventDefault(); show(i - 1); }
+    else if (e.key >= '1' && e.key <= '9') show(Number(e.key) - 1);
+    else if (e.key === 'n' || e.key === 'N') { notesOn = !notesOn; notes.classList.toggle('on', notesOn); }
+    else if (e.key === 'r' || e.key === 'R') { t0 = i > 0 ? Date.now() : null; timerEl.textContent = '0:00'; timerEl.className = 'timer'; }
+    else if (e.key === 'Home') show(0);
+  });
+  document.getElementById('stage').addEventListener('click', (e) => { if (!e.target.closest('a')) show(i + 1); });
+  show(0);
+</script>

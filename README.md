@@ -57,7 +57,8 @@ node src/provemewrong.js                       # full run from hypothesis.json: 
 | `engine/src/play.js` | Google Play reviews through the Web Scraper API (Unlocker fallback) → `out/play-reviews.json` |
 | `engine/src/ask.js` | The live step: one SERP call, printed for a room |
 | `engine/out/research.json` | The research object currently on the page (quotes verbatim, clusters computed, verdicts, counter-evidence, method in `meta`) |
-| `docs/deck.js` → `docs/first-breath-how-it-works.pptx` | The talk deck, same eight beats |
+| `docs/show/index.html` + `docs/SHOW.md` | **The 5-minute demo**: an animated, keyboard-driven show (the Founder, the Web, three Bright Data couriers) and its script — https://claude.ai/code/artifact/89960973-6b1f-4c94-8b32-f50f876d43b3 |
+| `docs/deck.js` → `docs/first-breath-how-it-works.pptx` | The backup deck, same arc |
 | `docs/TALK.md` | The five-minute talk with the live call inside it |
 | `SPEC.md` · `docs/ARCHITECTURE.md` | Data contract and end-to-end walkthrough |
 
