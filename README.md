@@ -80,4 +80,4 @@ The product is **[Moment](https://moment.szlezingier.com)** — one intention, a
 
 ## Talk deck
 
-`docs/first-breath-how-it-works.pptx` — ten slides, hypothesis → tried to break it → what held → what pushed back → the fix → how. Regenerate with `node docs/deck.js` (needs `pptxgenjs`). Every quote and number on it is the same `research.json`/corpus as the page.
+`docs/first-breath-how-it-works.pptx` — ten slides for a Bright Data audience: the idea → the three APIs → two patterns (refuting queries + `site:` via SERP; fallbacks + honest attribution) → what held → what was refuted → live call → output → recipe. Script in `docs/TALK.md`; live helper `node engine/src/ask.js "<query>"`. Regenerate with `node docs/deck.js` (needs `pptxgenjs`). Every quote and number on it is the same `research.json`/corpus as the page.

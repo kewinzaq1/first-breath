@@ -1,78 +1,82 @@
-# Moment — 5-minute talk
+# Break your own hypothesis with Bright Data — 5-minute talk
 
-Total: 5:00. Spoken ≈ 3:40 · live Moment 1:00 · buffer 0:20.
-Slides in `first-breath-how-it-works.pptx`; switch to the page at slide 9.
+Audience: Bright Data GTM event. Subject: **how to use the APIs**. Moment is the worked example.
+Total 5:00 · spoken ≈ 3:50 · live API call ≈ 0:45 · buffer 0:25.
+Slides: `first-breath-how-it-works.pptx`. Terminal ready at `engine/` with `.env` loaded.
 
 ---
 
 ## 0:00 — Slide 1 · Title (20 s)
 
-I teach meditation. And I have a problem with meditation apps — not the meditation, the apps. Tonight: one hypothesis, and how I used Bright Data to try to break it before I pitched it to anyone.
+Everyone in this room has a product idea they're too attached to. I'll show you how I made the web argue with mine in one evening, using two Bright Data endpoints and about three hundred lines of Node — and what it cost me to be wrong.
 
-## 0:20 — Slide 2 · The hypothesis (45 s)
+## 0:20 — Slide 2 · The idea (30 s)
 
-Two things are broken.
+The example: I build Moment. My belief had two parts. One: meditation apps overwhelm people with content. Two: the calm stays in the session — you're present for twenty minutes, then snap at the same message at lunch. Moment is one sentence, a pause every thirty minutes, one minute to choose again.
 
-One: the apps overwhelm you. Ten thousand apps, forty-day challenges, a guru for every mood. The thing that promised peace became one more marketplace to keep up with.
+Fine. But tonight's question isn't "is Moment good". It's: how do you get real people to argue with you *before* you build?
 
-Two — and this is the one I care about: the calm never leaves the session. You sit for twenty minutes, you feel present. Then the day happens. Same snap at the same message. Same second plate. Same midnight scroll. Practice stayed on the cushion. Life didn't.
+## 0:50 — Slide 3 · The APIs (45 s)
 
-So I built Moment. One sentence about how you want to move through today. A pause every thirty minutes. One minute to breathe and choose again. Meditation *inside* the day, not beside it.
+Everything I needed is one endpoint: `POST api.brightdata.com/request`, a zone, a URL, a Bearer token.
 
-That was the bet. A bet is not a business.
+**SERP API** with `brd_json=1` — Google, parsed for you: organic results with rank, title, link, description; people-also-ask; related searches. No HTML in my pipeline anywhere. About 1.8 seconds a query.
 
-## 1:05 — Slide 3 · Method (30 s)
+**Web Unlocker** — same endpoint, any URL, blocks and fingerprints handled. One thing to know: its errors come back as plain text, not JSON. Surface a snippet; never `JSON.parse` blindly.
 
-So I asked the web to prove me wrong. One Node script, wired to Bright Data. Three sources: 450 app-store reviews of Calm, Headspace and Waking Up; 30 threads from r/Meditation; and a hundred search results from twelve queries — **four of which were written to refute me**: does practice actually carry over? Does this product already exist?
+**Web Scraper API** — trigger a dataset, poll, download a snapshot. I wired it but didn't need it; it's the upgrade path for reviews at scale.
 
-Rules: every quote verbatim, every percentage computed, every source credited by the path that actually served it.
+## 1:35 — Slide 4 · Pattern 1: queries that would kill you (40 s)
 
-## 1:35 — Slide 4 · H1 holds (25 s)
+First pattern. If you only search for people who agree with you, the web will happily agree. So I bucketed twelve queries: *gap* — does the calm really stay on the cushion? *want* — what do people ask for instead? And *competition* — "mindfulness bell app", "one minute meditation reminder app" — written specifically to hurt.
 
-First half: overwhelm. 210 negative reviews, classified. 48% are billing rage. 20% are choice overload. Zero ask for more content. One user literally requests a button that picks a session at random "to reduce decision fatigue." People aren't asking for more. They're asking to be left alone.
+Second trick: reddit is KYC-gated on the Unlocker. So I don't fetch reddit. I ask Google for `site:reddit.com/r/Meditation …` through the SERP zone and get titles and snippets of the exact threads. No KYC, no parsing. Twelve queries, a hundred rows, twenty-five seconds.
 
-## 2:00 — Slide 5 · H2 holds (35 s)
+## 2:15 — Slide 5 · Pattern 2: design for the "no" (30 s)
 
-Second half: the gap. r/Meditation, in their own words. Someone meditating daily for a year: *"when another same trigger arose, I was still reactive."* Someone two years in, 151 upvotes: *"still dealing with intrusive thoughts, anxiety."*
+Zones have policies; design for the refusal before you get it. Every source has a primary path and a fallback: Unlocker → reddit JSON falls back to SERP `site:`; Unlocker → Apple's review feed falls back to the public API. And a counter records which path actually served — zero pages via Unlocker, nine direct, for Apple. The landing page credits exactly that. At a data event, that honesty *is* the product.
 
-And then the community prescribes the fix itself: *"to change your behavior, you need to bring your meditative mindset into daily life — in the act of making decisions."* That's Moment's sentence, written by a stranger.
+## 2:45 — Slide 6 · What held (25 s)
 
-Honest caveat: not everyone. Some long-term meditators say they are less reactive. The gap is real for the people who are asking — and they are the market.
+Results. Both halves held. 210 negative reviews classified: 48% billing rage, 20% choice overload — people asking for less. And the gap, in their own words: a daily meditator, one year in — "when another same trigger arose, I was still reactive." The community even prescribes the fix: "bring your meditative mindset into daily life, in the act of making decisions."
 
-## 2:35 — Slide 6 · The pushback (35 s)
+## 3:10 — Slide 7 · What was refuted (35 s)
 
-Here's the part I didn't want to find. The interrupt is not new. Mindfulness Bell, MindBell, Chill, Remindfulness — bells all day. There is an app called One-Moment Meditation — a registered trademark — one minute, with reminders. And Insight Timer owns the search for "one minute meditation reminder app."
+And here is the slide that paid for the evening. The competition queries worked: the interrupt already exists — Mindfulness Bell, MindBell, Chill. The minute already exists — there's an app called One-Moment Meditation, and it's a registered trademark. Insight Timer owns the search.
 
-So the web told me: Moment cannot be "a reminder app." The bell is taken. The minute is taken.
+So: I cannot position Moment as "a reminder app". But a *want* query found the #1 result on r/selfimprovement: "How to remember my set intention for the day? 23 minutes later I'm in the thick of it." Nobody in a hundred results does that. The bell is taken, the minute is taken, the intention is not. A wrong positioning and a trademark collision — caught for a few dollars of API calls.
 
-But one thread — r/selfimprovement: *"How to remember my set intention for the day? 23 minutes later I'm in the thick of it."* Nobody in a hundred results does that. The intention is not taken.
+## 3:45 — Slide 8 · Live (45 s)
 
-## 3:10 — Slide 7 · The fix (25 s)
+Let's do one now. Someone give me a question you'd type into Google about your own idea.
 
-The data didn't confirm my product. It sharpened it. Moment is not the bell — it's the sentence the bell hands back to you. You write it once at seven. You meet it again at nine, nine-thirty, ten — in the act of deciding. No library, no streak, no course. One intention. One minute.
+[Switch to terminal.]
 
-## 3:35 — Slide 8 · How (15 s)
+```bash
+cd engine && node src/ask.js "<query from the room>"
+```
 
-How: Bright Data's SERP API for search and for reddit — the only path that works without KYC. Web Unlocker tried first; Apple and reddit are gated, so the run fell back to Apple's public feed and says so on the page. Claude distills it into one JSON. That JSON is injected into a single HTML file — the proof *is* the pitch.
+[Read the request body on screen, then the #1 result out loud. Point at the ms count.]
 
-## 3:50 — Switch to the page · Slide 9 (1:10)
+That's the whole method. The rest is a loop.
 
-[Open the artifact, scroll to the last scene.]
+## 4:30 — Slide 9 · Output (15 s)
 
-This is the page. Same quotes, same numbers you just saw. And it ends with the product. Everyone — one sentence: how do you want to move through the rest of tonight?
+The result is one JSON: sources, verbatim quotes, computed clusters, the verdict, the counter-evidence. It's injected straight into a single-file landing page — the proof is the pitch. If we have time, the page ends with a real one-minute Moment.
 
-[Type one. Press Begin. Breathe with the room for 60 seconds. Say nothing. When the sentence comes back mid-minute, let them see it.]
+## 4:45 — Slide 10 · Close (15 s)
 
-## 5:00 — Close (10 s)
-
-"Now choose again." That's Moment. Stop defending your idea — let the web try to break it. moment.szlezingier.com. Thank you.
+Do this to your own idea tonight: two sentences of hypothesis, three queries that would kill it, SERP API with `brd_json=1`, `site:` your community, keep it honest. Repo's public. Thank you.
 
 ---
 
-### If you're running long
-Cut slide 8 entirely (say one line: "SERP API, public review feed, Claude, one HTML file") and the H2 caveat. Never cut the minute.
+### Timing safety
+- Running long → cut slide 9 entirely; say "the JSON goes into a page, link's on the last slide."
+- Wifi dies → slide 8 *is* the output; read it.
+- Running short → open the artifact and run the one-minute Moment with the room (60 s).
 
-### If asked
-- **"Why not Web Unlocker for reviews?"** Apple hosts and reddit are policy-gated without KYC on my zone. The collector tracks which path served and the page credits it honestly — that honesty is the point of the project.
-- **"Isn't this just a mindfulness bell?"** That's exactly what the data asked. The bell rings; Moment hands you *your* sentence. The unmet search is "how do I remember my intention," not "remind me to breathe."
-- **"The name?"** One-Moment Meditation® exists — found by this research. Naming is on the list.
+### Likely questions
+- **"Why didn't Web Unlocker serve the reviews?"** Apple hosts and reddit are policy-gated without KYC on my zone (`destination_ip_prohibited`). The collector tracks the serving path and the page credits it. Google Play *does* resolve through the Unlocker — that's next.
+- **"Cost?"** ~9 Apple-feed fetches, ~17 SERP queries, two runs. Well inside a trial account.
+- **"Why not just scrape reddit?"** I could with KYC. Without it, `site:` through SERP gives the thread titles and snippets — which is all a hypothesis test needs.
+- **"Isn't Moment just a mindfulness bell?"** That's exactly what the competition query asked. The bell rings; Moment hands you *your* sentence. The unmet search is "how do I remember my intention", not "remind me to breathe".

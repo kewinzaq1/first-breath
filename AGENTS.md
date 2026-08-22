@@ -41,6 +41,8 @@ engine/src/collect.js    3 fan-outs + fallbacks (see "hard-won lessons"). pathSt
 engine/src/analyze.js    buildPrompt() / parseAnalysis() / analyze() (Anthropic SDK).
 engine/src/run.js        Orchestrator. Flags: --collect-only, --inject-only.
 engine/src/question.js   Hypothesis sweep for Moment: 12 SERP queries (incl. refuting ones) → out/moment-serp.json.
+engine/src/ask.js        Stage helper: one SERP call, printed for a room. `node src/ask.js "<query>"`.
+docs/TALK.md             The 5-minute talk (API-centric: Bright Data is the subject, Moment the example).
 engine/out/research.json The analyzed result currently live on the page (committed? no — out/ is
                          gitignored, but this file was hand-synced to Kew's Mac; treat as data).
 SPEC.md                  Product+technical spec, incl. the data contract. Keep it true.
