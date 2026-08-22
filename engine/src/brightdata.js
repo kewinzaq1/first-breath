@@ -24,7 +24,9 @@ const authHeaders = () => ({
 
 const snip = (s, n = 140) => (s ?? '').replace(/\s+/g, ' ').slice(0, n);
 
-/** Core: fetch any URL through a Bright Data zone. */
+/** Core: fetch any URL through a Bright Data zone.
+    Bright Data answers HTTP 200 even when the upstream fetch failed — the truth is in the headers
+    (`x-brd-status-code: 502`, `x-brd-error-code: captcha | expect_body | …`). Surface it. */
 async function bdRequest(zone, url, format = 'raw') {
   const res = await fetch(`${BASE}/request`, {
     method: 'POST',
@@ -33,6 +35,12 @@ async function bdRequest(zone, url, format = 'raw') {
   });
   const text = await res.text();
   if (!res.ok) throw new Error(`Bright Data /request ${res.status}: ${snip(text)}`);
+  const brdCode = res.headers.get('x-brd-error-code');
+  if (brdCode) {
+    const err = new Error(`Bright Data upstream ${res.headers.get('x-brd-status-code') ?? ''} ${brdCode}: ${res.headers.get('x-brd-error') ?? ''} ${snip(text, 80)}`.trim());
+    err.brdCode = brdCode;
+    throw err;
+  }
   return text;
 }
 
@@ -53,13 +61,29 @@ export async function unlockJson(url) {
   }
 }
 
-/** Google search through the SERP zone. `brd_json=1` asks Bright Data to parse the SERP for you. */
-export async function serp(query, { gl = 'us', hl = 'en', num = 20 } = {}) {
-  const url =
-    `https://www.google.com/search?q=${encodeURIComponent(query)}` +
-    `&gl=${gl}&hl=${hl}&num=${num}&brd_json=1`;
-  const text = await bdRequest(env('BRIGHTDATA_SERP_ZONE'), url);
-  return JSON.parse(text);
+/** Google search through the SERP zone. `brd_json=1` asks Bright Data to parse the SERP for you.
+    Resilience (measured Aug 22 during a Google captcha wave: ~40–60 % of first attempts failed with
+    x-brd-error-code expect_body / captcha): a failed query is locked for 15 s under its exact text, so
+    retries vary the text in ways Google treats identically (trailing "?"), then wait out the lock once. */
+export async function serp(query, { gl = 'us', hl = 'en', onRetry } = {}) {
+  const url = (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}&gl=${gl}&hl=${hl}&brd_json=1`;
+  const plan = [
+    { q: query, waitMs: 0 }, { q: `${query}?`, waitMs: 0 }, { q: `${query} ?`, waitMs: 0 },
+    { q: query, waitMs: 16000 }, { q: `${query}?`, waitMs: 0 },
+  ];
+  let last;
+  for (let i = 0; i < plan.length; i++) {
+    if (plan[i].waitMs) await new Promise((r) => setTimeout(r, plan[i].waitMs));
+    try {
+      const text = await bdRequest(env('BRIGHTDATA_SERP_ZONE'), url(plan[i].q));
+      if (text.trim().startsWith('{')) return JSON.parse(text);
+      last = new Error(`non-JSON body: ${snip(text, 80) || '(empty)'}`);
+    } catch (err) {
+      last = err;
+    }
+    if (i < plan.length - 1) onRetry?.({ attempt: i + 1, reason: last.brdCode ?? last.message, waitMs: plan[i + 1].waitMs });
+  }
+  throw new Error(`SERP zone failed ${plan.length}× for "${query}" — last: ${last.message}`);
 }
 
 // ---------- Web Scraper API (datasets) — optional structured path ----------
