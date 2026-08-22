@@ -1,4 +1,4 @@
-<title>First Breath</title>
+<title>Moment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Karla:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
@@ -406,13 +406,44 @@
   .begin:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .begin[disabled] { opacity: 0; pointer-events: none; }
 
+  .intention-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 0.7rem;
+    width: 100%; max-width: 26rem; margin-top: 1.6rem;
+    transition: opacity .8s ease;
+  }
+  .intention-wrap .eyebrow { text-align: center; }
+  .intention {
+    width: 100%;
+    background: transparent;
+    border: 0; border-bottom: 1px solid var(--ember-dim);
+    color: var(--ink);
+    font-family: var(--display); font-style: italic; font-size: 1.2rem;
+    text-align: center; padding: 0.5rem 0.75rem;
+    outline: none;
+  }
+  .intention::placeholder { color: var(--faint); }
+  .intention:focus-visible { border-bottom-color: var(--ember); }
+  .intention-wrap.hidden { opacity: 0; pointer-events: none; position: absolute; }
+  .breath-intention {
+    font-family: var(--display); font-style: italic; font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+    color: var(--ember); margin-top: 1.2rem; max-width: 30rem; text-wrap: balance;
+    min-height: 1.5rem; transition: opacity 1.2s ease;
+  }
+  .after-note { margin-top: 0.8rem; color: var(--muted); font-size: 0.95rem; }
+  .begin.link { display: inline-block; text-decoration: none; margin-top: 1.6rem; }
+  .coda .note a { color: var(--faint); }
+
   .after-breath {
-    margin-top: 3.4rem;
+    display: none;
+    margin-top: 1.2rem;
     opacity: 0;
-    transition: opacity 2s ease 0.5s;
+    transition: opacity 2s ease 0.3s;
     text-align: center;
   }
-  .after-breath.on { opacity: 1; }
+  .after-breath.on { display: block; }
+  .after-breath.on.visible { opacity: 1; }
+  .begin.quiet { margin-top: 1.4rem; font-size: 0.68rem; color: var(--muted); border-color: #241E19; padding: 0.7rem 1.6rem; }
+  .begin.quiet:hover, .begin.quiet:focus-visible { background: transparent; color: var(--ember); box-shadow: none; border-color: var(--ember-dim); }
   .after-breath .thats {
     font-family: var(--display);
     font-style: italic;
@@ -474,8 +505,8 @@
   <!-- 1 · HERO -->
   <section class="scene hero center">
     <div class="orb" aria-hidden="true"></div>
-    <h1 class="rv">First Breath</h1>
-    <p class="sub rv d2">A pragmatic way into meditation — and the story of how the web itself pointed the way.</p>
+    <h1 class="rv">Moment</h1>
+    <p class="sub rv d2">Not another meditation app — and the story of how I asked the web to prove me wrong.</p>
     <div class="scroll-hint" aria-hidden="true">scroll</div>
   </section>
 
@@ -493,19 +524,19 @@
   <section class="scene alone center">
     <div class="measure">
       <div class="dot rv" aria-hidden="true"></div>
-      <h2 class="rv d1">We have never had more tools for&nbsp;calm.</h2>
-      <p class="quiet rv d2">And we have never felt more disconnected. Most people don't fail at meditation. They fail at choosing how to start.</p>
+      <h2 class="rv d1">Calm for twenty minutes.<br>Then the day&nbsp;happens.</h2>
+      <p class="quiet rv d2">You sit. You feel present. Then you snap at the same message, eat the same second plate, scroll past the same bedtime. The practice stayed on the cushion. Life didn't.</p>
     </div>
   </section>
 
   <!-- 4 · INSTINCT -->
   <section class="scene instinct center">
     <div class="measure">
-      <div class="ring rv" style="margin-left:auto;margin-right:auto;">10:00</div>
-      <p class="eyebrow rv d1">my instinct</p>
-      <h2 class="rv d2">I teach meditation the pragmatic way.</h2>
-      <p class="steps rv d3">Start a timer. Count your breaths. That's&nbsp;it.</p>
-      <p class="doubt rv d4">No incense, no astral planes, no library of five hundred sessions. It works for the people I sit with. But is that what the world wants — or just what I&nbsp;believe?</p>
+      <div class="ring rv" style="margin-left:auto;margin-right:auto;">01:00</div>
+      <p class="eyebrow rv d1">my hypothesis</p>
+      <h2 class="rv d2">Two things are broken.</h2>
+      <p class="steps rv d3">The apps overwhelm you. And the calm never leaves the&nbsp;session.</p>
+      <p class="doubt rv d4">So I built Moment: one intention, a pause every thirty minutes, one minute to choose again. Meditation inside the day, not beside it. That was the bet. But a bet is not a business — so before telling anyone, I tried to break&nbsp;it.</p>
     </div>
   </section>
 
@@ -513,8 +544,8 @@
   <section class="scene ask center">
     <div class="measure" style="max-width:40rem;">
       <p class="eyebrow data-voice rv">the research</p>
-      <h2 class="rv d1">So instead of guessing,<br>I asked the web what it really&nbsp;thinks.</h2>
-      <p class="lede rv d2">One agent, wired to Bright Data, fanned out across the places where people tell the truth about meditation apps.</p>
+      <h2 class="rv d1">I asked the web<br>to prove me&nbsp;wrong.</h2>
+      <p class="lede rv d2">One agent, wired to Bright Data, went to the places where people tell the truth — app-store reviews, r/Meditation, and the questions people type when the cushion stops working. Half the searches were written to refute the hypothesis.</p>
     </div>
     <div class="threads" id="threads"></div>
   </section>
@@ -523,15 +554,15 @@
   <section class="scene reveal">
     <div class="measure">
       <p class="eyebrow data-voice rv center" style="text-align:center;">what came back</p>
-      <h2 class="rv d1">Thousands of strangers.<br>One message.</h2>
+      <h2 class="rv d1">Half of it held.<br>Half of it pushed&nbsp;back.</h2>
 
       <div class="quotes" id="quotes"></div>
 
       <div class="clusters" id="clusters"></div>
 
-      <p class="gap rv">serp · <b>"how to start meditating without an app"</b> · 9 results<br>reddit, blogs, a facebook group, quora. not one of them is a timer.</p>
+      <p class="gap rv">the pushback · <b>the interrupt is not new</b><br>mindfulness bell · mindbell · chill · one-moment meditation® — all exist. insight timer owns "one minute meditation reminder app".<br>what no result offers: remembering <b>your own intention</b> at the moment it matters.</p>
 
-      <p class="verdict rv">The market wasn't asking for another library of calm.<br>It was asking for <em>permission to keep it simple.</em></p>
+      <p class="verdict rv">The bell is taken. The minute is taken.<br>What people lose by 9am is <em>the sentence they chose at 7.</em></p>
     </div>
   </section>
 
@@ -539,28 +570,35 @@
   <section class="scene way center">
     <div class="measure">
       <p class="eyebrow rv">the way</p>
-      <h2 class="rv d1">The data didn't give me a product.<br>It gave me permission.</h2>
-      <p class="rv d2">First Breath is meditation with everything removed except the part that works. No accounts of enlightenment. No five-hundred-session library. No guru.</p>
-      <p class="keeps rv d3">One timer. Counted breaths. Nothing else.</p>
+      <h2 class="rv d1">The data didn't confirm my product.<br>It sharpened it.</h2>
+      <p class="rv d2">Moment is not a reminder app and not a meditation library. You write one sentence about how you want to move through today. Every thirty minutes, in the middle of real life, it hands that sentence back to you — with one minute to breathe and choose again.</p>
+      <p class="keeps rv d3">One intention. One minute. In the moment it matters.</p>
     </div>
   </section>
 
   <!-- 8 · BREATHE -->
   <section class="scene breathe center">
     <div class="breath-orb" id="breathOrb" aria-hidden="true"></div>
-    <div class="breath-word" id="breathWord" aria-live="polite">Try it now.</div>
+    <div class="breath-word" id="breathWord" aria-live="polite">Try one moment.</div>
     <div class="breath-count" id="breathCount"></div>
-    <button class="begin" id="beginBtn">Begin · ten breaths</button>
+    <p class="breath-intention" id="breathIntention" aria-live="polite"></p>
+    <label class="intention-wrap" id="intentionWrap">
+      <span class="eyebrow">one sentence · how do you want to move through today?</span>
+      <input class="intention" id="intention" type="text" maxlength="90" autocomplete="off" placeholder="Slow down before I answer." aria-label="Your intention for today">
+    </label>
     <div class="after-breath" id="afterBreath">
-      <p class="thats">That's the whole product.</p>
+      <p class="thats" id="afterIntention">That's one moment.</p>
+      <p class="after-note">Moment hands you this sentence every thirty minutes, in the hours you choose.</p>
+      <a class="begin link" href="https://moment.szlezingier.com" target="_blank" rel="noopener">Start your first minute →</a>
     </div>
+    <button class="begin" id="beginBtn">Begin · one minute</button>
   </section>
 
   <!-- CODA -->
   <footer class="coda">
-    <p class="gtm">This is what go-to-market looks like when you stop guessing —<br>and let <em>the web itself</em> show you the way.</p>
+    <p class="gtm">This is what go-to-market looks like when you stop defending your idea —<br>and let <em>the web itself</em> try to break it.</p>
     <p class="built">Built with Bright Data SERP API · Apple's public review feed · Claude</p>
-    <p class="note">450 reviews · 30 threads · 42 search results collected on aug 21, 2026 — every quote verbatim, every number computed from the corpus</p>
+    <p class="note">450 reviews · 30 threads · 146 search results across 17 queries, collected aug 21–22, 2026 — every quote verbatim, every number computed from the corpus · <a href="https://moment.szlezingier.com">moment.szlezingier.com</a></p>
   </footer>
 
 </main>
@@ -582,30 +620,30 @@
     },
     {
       "api": "SERP API",
-      "what": "42 search results for how beginners actually ask",
-      "from": "\"how to start meditating without an app\""
+      "what": "104 search results from 12 questions written to break the hypothesis",
+      "from": "\"meditate every day but still reactive\" · \"mindfulness bell app\""
     }
   ],
   "quotes": [
-    {
-      "text": "Congrats instead of lowering my heart rate I have increased my rage.",
-      "src": "headspace app-store review · apple public feed"
-    },
     {
       "text": "Now I just feel overwhelmed with the amount of content. A feature that randomly selects a session would reduce decision fatigue.",
       "src": "headspace app-store review · apple public feed"
     },
     {
-      "text": "It was and should be a simple app following the idea itself.",
-      "src": "headspace app-store review · apple public feed"
-    },
-    {
-      "text": "The idea that we now need to pay a $70 yearly subscription for a timer is embarrassingly greedy.",
+      "text": "meditation helps me identify when I am not being present, However, when another same trigger arose, I was still reactive.",
       "src": "r/meditation · via bright data serp"
     },
     {
-      "text": "It's simple enough that I actually use it. Here's the practice: Sit or lie down comfortably. Set a timer for 3–5…",
+      "text": "It's been 2years already into meditation. I am still dealing with intrusive thoughts, anxiety.",
+      "src": "r/meditation · 151 votes · via bright data serp"
+    },
+    {
+      "text": "In order to change your behavior, you need to begin to bring your meditative mindset into daily life when you are in the act of making decisions…",
       "src": "r/meditation · via bright data serp"
+    },
+    {
+      "text": "My morning yoga includes setting an intention for the day… 23 minutes later I'm in the thick of…",
+      "src": "r/selfimprovement · via bright data serp"
     }
   ],
   "clusters": [
@@ -717,20 +755,30 @@
   const after = document.getElementById('afterBreath');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const IN_MS = 4000, OUT_MS = 6000, TOTAL = 10;
+  const IN_MS = 4000, OUT_MS = 6000, TOTAL = 6; // 6 breaths × 10 s = one minute
   let running = false;
+  const intentionInput = document.getElementById('intention');
+  const intentionWrap = document.getElementById('intentionWrap');
+  const breathIntention = document.getElementById('breathIntention');
+  const afterIntention = document.getElementById('afterIntention');
+  const intentionText = () => intentionInput.value.trim() || intentionInput.placeholder;
 
   function breathe(n) {
     if (n > TOTAL) {
-      word.textContent = 'Welcome back.';
+      word.textContent = 'Now choose again.';
       count.textContent = '';
+      breathIntention.textContent = '';
       orb.classList.remove('in', 'out');
+      afterIntention.textContent = '“' + intentionText() + '”';
       after.classList.add('on');
+      requestAnimationFrame(() => after.classList.add('visible'));
       running = false;
-      btn.textContent = 'Again · ten breaths';
+      btn.textContent = 'Again · with a new sentence';
+      btn.classList.add('quiet');
       btn.removeAttribute('disabled');
       return;
     }
+    if (n === Math.ceil(TOTAL / 2)) breathIntention.textContent = intentionText(); // the intention comes back mid-minute
     word.textContent = 'Breathe in';
     count.textContent = n + ' / ' + TOTAL;
     if (!reduced) { orb.classList.remove('out'); orb.classList.add('in'); }
@@ -744,19 +792,32 @@
 
   btn.addEventListener('click', () => {
     if (running) return;
+    if (btn.classList.contains('quiet')) { // "again": reset to the input state
+      btn.classList.remove('quiet'); btn.textContent = 'Begin · one minute';
+      after.classList.remove('on', 'visible');
+      word.textContent = 'Try one moment.';
+      intentionWrap.classList.remove('hidden');
+      intentionInput.focus();
+      return;
+    }
     running = true;
     btn.setAttribute('disabled', '');
-    after.classList.remove('on');
+    after.classList.remove('on', 'visible');
+    intentionWrap.classList.add('hidden');
+    breathIntention.textContent = '';
     breathe(1);
   });
+  intentionInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') btn.click(); });
 
   // stage safety: Escape stops a running session and resets the scene
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !running) return;
     running = false;
     orb.classList.remove('in', 'out');
-    word.textContent = 'Try it now.';
+    word.textContent = 'Try one moment.';
     count.textContent = '';
+    breathIntention.textContent = '';
+    intentionWrap.classList.remove('hidden');
     btn.removeAttribute('disabled');
   });
 </script>

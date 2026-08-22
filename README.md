@@ -74,6 +74,10 @@ Nothing in the pipeline is meditation-specific. Swap the app IDs, subreddits, an
 
 MIT licensed. Built with Bright Data SERP API · Apple's public review feed · Claude. (Web Unlocker and Web Scraper API paths are wired and ready once the account has KYC.)
 
+## The product
+
+The product is **[Moment](https://moment.szlezingier.com)** — one intention, a pause every thirty minutes, one minute to choose again. This repo is the go-to-market research that tried to break Moment's hypothesis with real web data, and the page that tells that story. ("First Breath" is the repo's original name.)
+
 ## Talk deck
 
-`docs/first-breath-how-it-works.pptx` — ten slides, pain → proof → fix → how. Regenerate with `node docs/deck.js` (needs `pptxgenjs`). Every quote and number on it is the same `research.json`/corpus as the page.
+`docs/first-breath-how-it-works.pptx` — ten slides, hypothesis → tried to break it → what held → what pushed back → the fix → how. Regenerate with `node docs/deck.js` (needs `pptxgenjs`). Every quote and number on it is the same `research.json`/corpus as the page.
